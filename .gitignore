@@ -1,0 +1,4 @@
+/vendor/
+.env
+/public/build
+/storage/pail
