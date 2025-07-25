@@ -11,3 +11,8 @@ Route::get('/user', function (Request $request) {
 
 Route::apiResource('rounds', RoundController::class);
 Route::apiResource('addresses', AddressController::class);
+
+Route::middleware('auth:sanctum')->group(function () {
+    Route::get('rounds/{round}/addresses', [RoundController::class, 'getAdresses']); // list of adresses on same round
+    Route::post('rounds/{round}/addresses', [RoundController::class, 'attachAddresses']);
+});
