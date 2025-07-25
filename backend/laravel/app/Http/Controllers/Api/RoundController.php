@@ -31,6 +31,7 @@ class RoundController extends Controller
     public function show(string $id)
     {
         //
+        return Round::where('id',$id)->first();
     }
 
     /**
