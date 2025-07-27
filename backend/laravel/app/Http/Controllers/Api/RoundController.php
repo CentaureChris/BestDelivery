@@ -5,16 +5,18 @@ namespace App\Http\Controllers\Api;
 use App\Models\Round;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Validation\Rule;
 
 class RoundController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Display a listing of the resource (only for the connected user).
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
-        return Round::all();
+        $user = $request->user();
+        return Round::where('user_id', $user->id)->get();
     }
 
     /**
@@ -22,16 +24,34 @@ class RoundController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $user = $request->user();
+
+        $validated = $request->validate([
+            'name' => 'required|string|max:255',
+            'date' => 'required|date',
+            'optimization_type' => ['required', Rule::in(['shortest', 'fastest', 'eco'])],
+        ]);
+
+        $validated['user_id'] = $user->id;
+
+        $round = Round::create($validated);
+
+        return response()->json($round, 201);
     }
 
     /**
-     * Display the specified resource.
+     * Display the specified resource (only if it belongs to the user).
      */
-    public function show(string $id)
+    public function show(Request $request, string $id)
     {
-        //
-        return Round::where('id',$id)->first();
+        $user = $request->user();
+        $round = Round::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$round) {
+            return response()->json(['message' => 'Round not found'], 404);
+        }
+
+        return response()->json($round);
     }
 
     /**
@@ -39,14 +59,38 @@ class RoundController extends Controller
      */
     public function update(Request $request, string $id)
     {
-        //
+        $user = $request->user();
+        $round = Round::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$round) {
+            return response()->json(['message' => 'Round not found'], 404);
+        }
+
+        $validated = $request->validate([
+            'name' => 'sometimes|string|max:255',
+            'date' => 'sometimes|date',
+            'optimization_type' => ['sometimes', Rule::in(['shortest', 'fastest', 'eco'])],
+        ]);
+
+        $round->update($validated);
+
+        return response()->json($round);
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(string $id)
+    public function destroy(Request $request, string $id)
     {
-        //
+        $user = $request->user();
+        $round = Round::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$round) {
+            return response()->json(['message' => 'Round not found'], 404);
+        }
+
+        $round->delete();
+
+        return response()->json(['message' => 'Round deleted successfully.']);
     }
 }
