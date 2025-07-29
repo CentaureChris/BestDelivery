@@ -27,15 +27,17 @@ class RoundController extends Controller
         $user = $request->user();
 
         $validated = $request->validate([
-            'name' => 'required|string|max:255',
             'date' => 'required|date',
-            'optimization_type' => ['required', Rule::in(['shortest', 'fastest', 'eco'])],
+            'type_optimisation' => ['required', Rule::in(['shortest', 'fastest', 'eco'])],
+            'itinerary' => 'required|string|max:255',
         ]);
 
         $validated['user_id'] = $user->id;
 
         $round = Round::create($validated);
-
+        if (!$round) {
+            return response()->json(['message' => 'error in round creation'], 400);
+        }
         return response()->json($round, 201);
     }
 
@@ -67,10 +69,12 @@ class RoundController extends Controller
         }
 
         $validated = $request->validate([
-            'name' => 'sometimes|string|max:255',
-            'date' => 'sometimes|date',
-            'optimization_type' => ['sometimes', Rule::in(['shortest', 'fastest', 'eco'])],
+            'date' => 'required|date',
+            'type_optimisation' => ['sometimes', Rule::in(['shortest', 'fastest', 'eco'])],
+            'itinerary' => 'required|string|max:255'
         ]);
+
+        $validated['user_id'] = $user->id;
 
         $round->update($validated);
 

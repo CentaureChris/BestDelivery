@@ -1,0 +1,25 @@
+.layout {
+  display: flex;
+  min-height: 100vh;
+}
+
+.mainContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  background: #fafbfc;
+  color: #16191f;
+}
+
+.main {
+  flex: 1;
+  padding: 2rem 3rem;
+  position: relative;
+}
+
+.heading {
+  font-size: 1.4rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+  color: #16191f;
+}

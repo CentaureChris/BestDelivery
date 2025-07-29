@@ -13,6 +13,7 @@ Route::get('/user', function (Request $request) {
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::middleware('auth:sanctum')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('rounds', RoundController::class);
     Route::apiResource('addresses', AddressController::class);
     Route::get('rounds/{round}/addresses', [RoundController::class, 'getAdresses']); // list of adresses on same round

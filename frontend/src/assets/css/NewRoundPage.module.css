@@ -1,0 +1,56 @@
+.page {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
+
+.content {
+  flex: 1;
+  padding: 2.5rem;
+  background: #f9fafe;
+}
+
+.heading {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 2rem;
+}
+
+.formGroup {
+  margin-bottom: 1.5rem;
+}
+
+.input {
+  width: 75%;
+  padding: 0.7rem 1rem;
+  border-radius: 0.4rem;
+  border: 1px solid #e4e7ec;
+  background: #f6f7fb;
+  font-size: 1rem;
+}
+
+.addBtn {
+  margin-left: 1rem;
+  padding: 0.7rem 1.2rem;
+  background: #4094f7;
+  color: #fff;
+  border: none;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.addressList {
+  margin-top: 1rem;
+}
+
+.validateBtn {
+  margin-top: 2rem;
+  padding: 0.7rem 2rem;
+  background: #42b883;
+  color: #fff;
+  border: none;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  cursor: pointer;
+}

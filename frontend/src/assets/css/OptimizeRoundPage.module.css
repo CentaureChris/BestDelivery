@@ -1,0 +1,65 @@
+.container {
+  padding: 2.5rem;
+  background: #f9fafe;
+  min-height: 100vh;
+}
+
+.heading {
+  font-size: 1.3rem;
+  font-weight: 600;
+  margin-bottom: 1.5rem;
+}
+
+.options {
+  margin-bottom: 1.2rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.optionBtn {
+  padding: 0.6rem 1.3rem;
+  border-radius: 0.4rem;
+  border: none;
+  font-weight: 600;
+  background: #f3f7fb;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.optionBtn.selected,
+.optionBtn:hover {
+  background: #4094f7;
+  color: #fff;
+}
+
+.mapContainer {
+  background: #e6ecfa;
+  border-radius: 1rem;
+  height: 270px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.footerBtns {
+  margin-top: 2.5rem;
+  display: flex;
+  gap: 1rem;
+}
+
+.actionBtn {
+  padding: 0.7rem 1.2rem;
+  border: none;
+  border-radius: 0.4rem;
+  font-weight: 600;
+  background: #f3f7fb;
+  color: #222;
+  cursor: pointer;
+  transition: background 0.18s;
+}
+
+.actionBtn:hover {
+  background: #42b883;
+  color: #fff;
+}

@@ -10,6 +10,14 @@ class Round extends Model
 {
     use HasFactory;
 
+    // Allow these fields for mass-assignment
+    protected $fillable = [
+        'user_id',
+        'date',
+        'type_optimisation',
+        'itinerary',
+    ];
+
     public function addresses()
     {
         return $this->belongsToMany(Address::class,'address_round')
