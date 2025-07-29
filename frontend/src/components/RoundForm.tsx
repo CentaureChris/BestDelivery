@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { type Address } from "../types/index";
 import AddressList from "./AddressList";
+import styles from "../assets/css/RoundForm.module.css"
 
 type Props = {
   onSubmit: (addresses: Address[]) => void;
@@ -25,23 +26,13 @@ const RoundForm: React.FC<Props> = ({ onSubmit }) => {
   };
 
   return (
-    <div>
+    <div className={styles.formGroup} >
       <div className="flex mb-4">
-        <input
-          type="text"
-          value={addressInput}
-          onChange={e => setAddressInput(e.target.value)}
-          placeholder="Enter address"
-          className="border p-2 flex-1"
-        />
-        <button onClick={addAddress} className="ml-2 btn">Add</button>
+        <input  type="text" value={addressInput} onChange={e => setAddressInput(e.target.value)} placeholder="Enter address" className={styles.input}/>
+        <button onClick={addAddress} className={styles.addBtn}>Add</button>
       </div>
       <AddressList addresses={addresses} onDelete={deleteAddress} />
-      <button
-        className="mt-4 btn"
-        onClick={() => onSubmit(addresses)}
-        disabled={addresses.length === 0}
-      >
+      <button className={styles.validateBtn} onClick={() => onSubmit(addresses)} disabled={addresses.length === 0}>
         Validate addresses
       </button>
     </div>

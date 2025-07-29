@@ -4,7 +4,7 @@ import Sidebar from "../components/Sidebar";
 import RoundForm from "../components/RoundForm";
 import { useNavigate } from "react-router-dom";
 import type { Address } from "../types/index";
-import styles from '../assets/css/NewRoundPage.module.css';
+import commonStyles from '../assets/css/CommonStyles.module.css';
 
 const NewRoundPage: React.FC = () => {
   const navigate = useNavigate();
@@ -16,17 +16,19 @@ const NewRoundPage: React.FC = () => {
   };
 
   return (
-    <div className={styles.page}>
+    <div className={commonStyles.layout}>
+    <Sidebar />
+    <div className={commonStyles.mainContent}>
       <Navbar />
-      <div className="flex flex-1">
-        <Sidebar />
-        <main className="flex-1 p-8">
-          <h2 className="text-xl font-semibold mb-4">Create New Round</h2>
-          <RoundForm onSubmit={handleSubmit} />
-        </main>
-      </div>
+      <main className={commonStyles.main}>
+        <h2 className={commonStyles.heading}>Create New Round</h2>
+        <RoundForm onSubmit={handleSubmit} />
+      </main>
     </div>
+  </div>
   );
 };
 
 export default NewRoundPage;
+
+  

@@ -3,7 +3,7 @@ import Sidebar from "../components/Sidebar";
 import RoundList from "../components/RoundList";
 import Navbar from "../components/Navbar";
 import type { Round } from "../types/index";
-import styles from '../assets/css/DashboardPage.module.css';
+import commonStyles from '../assets/css/CommonStyles.module.css';
 
 
 // Dummy data for rounds
@@ -13,12 +13,12 @@ const rounds: Round[] = [
 ];
 
 const DashboardPage: React.FC = () => (
-  <div className={styles.layout}>
+  <div className={commonStyles.layout}>
     <Sidebar />
-    <div className={styles.mainContent}>
+    <div className={commonStyles.mainContent}>
       <Navbar />
-      <main className={styles.main}>
-        <h2 className={styles.heading}>My Rounds</h2>
+      <main className={commonStyles.main}>
+        <h2 className={commonStyles.heading}>My Rounds</h2>
         <RoundList rounds={rounds} />
       </main>
     </div>

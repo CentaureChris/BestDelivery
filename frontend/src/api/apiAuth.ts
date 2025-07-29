@@ -29,6 +29,7 @@ export async function login(email: string, password: string): Promise<LoginRespo
 }
 
 export async function logout(): Promise<LoginResponse> {
-  const response = await axios.post(`${API_BASE_URL}/login`);
+  const response = await axios.post(`${API_BASE_URL}/logout`);
+  localStorage.removeItem("token");
   return response.data;
 }
