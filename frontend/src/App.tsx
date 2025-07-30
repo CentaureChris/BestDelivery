@@ -6,6 +6,11 @@ import OptimizeRoundPage from "./pages/OptimizeRoundPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import PrivateRoute from "./components/PrivateRoute";
+import { setAuthToken } from "./api/apiAuth"; // <-- import your token util
+
+// Initialize the token ONCE at app start
+const token = localStorage.getItem("token");
+setAuthToken(token);
 
 const App: React.FC = () => (
   <BrowserRouter>

@@ -10,10 +10,10 @@ export interface Address {
 
 export interface Round {
   id: number;
-  name: string;
   date: string;
-  addresses: Address[];
-  optimizationType: 'shortest' | 'fastest' | 'eco';
+  itinerary: Address[];
+  type_optimisation: 'shortest' | 'fastest' | 'eco';
+  user_id: number;
 }
 
 export interface User {
@@ -21,3 +21,4 @@ export interface User {
   name: string;
   email: string;
 }
+

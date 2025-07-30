@@ -3,18 +3,19 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import MapView from "../components/MapView";
 import { type Address } from "../types/index";;
+import commonStyles from "../assets/css/CommonStyles.module.css";
 
 // Dummy addresses
 const addresses: Address[] = [
-  { id: 1, text: "12 Rue du Pont, Paris", order: 1 },
-  { id: 2, text: "45 Av. Jean Jaurès", order: 2 }
+  { id: 1, text: "12 Rue du Pont, Paris", order: 1, latitude:48.74556945746418, longitude: 2.3502087235550397 },
+  { id: 2, text: "45 Av. Jean Jaurès", order: 2, latitude:48.75, longitude: 2.3166 },
 ];
 
 const OptimizeRoundPage: React.FC = () => (
-  <div className="h-screen flex flex-col">
-    <Navbar />
-    <div className="flex flex-1">
+   <div className={commonStyles.layout}>
       <Sidebar />
+      <div className={commonStyles.mainContent}>
+        <Navbar />
       <main className="flex-1 p-8">
         <h2 className="text-xl font-semibold mb-4">Optimize Your Round</h2>
         <div className="mb-4">
