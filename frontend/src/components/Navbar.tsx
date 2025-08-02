@@ -16,7 +16,7 @@ const Navbar: React.FC = () => {
   }
   return (
   <nav className={styles.navbar}>
-    <span className={styles.brand}>Delivery Optimizer</span>
+    <span className={styles.brand}>BESTDELIVERY</span>
     <div className={styles.actions}>
       <button className={styles.btn}>Profile</button>
       <button className={styles.btn} onClick={userLogout}>Logout</button>

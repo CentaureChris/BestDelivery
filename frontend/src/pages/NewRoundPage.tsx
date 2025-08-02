@@ -21,7 +21,7 @@ const NewRoundPage: React.FC = () => {
     <div className={commonStyles.mainContent}>
       <Navbar />
       <main className={commonStyles.main}>
-        <h2 className={commonStyles.heading}>Create New Round</h2>
+        <h2 className={commonStyles.heading}>Créer une nouvelle tournée</h2>
         <RoundForm onSubmit={handleSubmit} />
       </main>
     </div>

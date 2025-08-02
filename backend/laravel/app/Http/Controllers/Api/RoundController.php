@@ -119,7 +119,7 @@ class RoundController extends Controller
         return response()->json($addresses);
     }
 
-    public function optimize(Request $request, Round $round)
+    public function optimize(Request $request, Round $round) // Function for GraphHopper
     {
         $user = $request->user();
         if ($round->user_id !== $user->id) {
@@ -143,7 +143,7 @@ class RoundController extends Controller
             ];
         }
 
-        // Le véhicule part et arrive au premier point (circuit fermé, adapte si besoin)
+        // Le véhicule part d'un point A et arrive au dernier point (circuit ouvert)
         $vehicle = [
             "vehicle_id" => "vehicle_1",
             "start_address" => [

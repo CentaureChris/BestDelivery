@@ -35,7 +35,7 @@ const DashboardPage: React.FC = () => {
       <div className={commonStyles.mainContent}>
         <Navbar />
         <main className={commonStyles.main}>
-          <h2 className={commonStyles.heading}>My Rounds</h2>
+          <h2 className={commonStyles.heading}>Mes Tournées</h2>
           {loading && <p>Loading...</p>}
           {error && <p style={{ color: "red" }}>{error}</p>}
           {!loading && !error && <RoundList rounds={rounds} />}

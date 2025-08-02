@@ -63,3 +63,9 @@
   background: #42b883;
   color: #fff;
 }
+
+.bottomBarButton {
+  margin-top: 1rem;
+  display: flex;
+  justify-content: space-evenly;
+}

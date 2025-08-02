@@ -6,6 +6,8 @@ import MapView from "../components/MapView";
 import type { Address, Round } from "../types/index";
 import { getRound, getAddresses, optimizeRound } from "../api/apiRound";
 import commonStyles from "../assets/css/CommonStyles.module.css";
+import styles from "../assets/css/OptimizeRoundPage.module.css"
+
 
 const OptimizeRoundPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -72,7 +74,7 @@ const OptimizeRoundPage: React.FC = () => {
             <button className="btn">Eco</button> */}
           </div>
           <MapView addresses={addresses} polyline={orsPolyline}/>
-          <div className="mt-4 flex gap-4">
+          <div className={styles.bottomBarButton}>
             <button className="btn">Edit Order</button>
             <button
               className="btn"
@@ -81,7 +83,7 @@ const OptimizeRoundPage: React.FC = () => {
             >
               {optimizing ? "Optimizing..." : "Recalculate"}
             </button>
-            <button className="btn">Save</button>
+            {/* <button className="btn">Save</button> */}
             <button className="btn">Export PDF</button>
           </div>
         </main>

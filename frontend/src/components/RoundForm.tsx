@@ -28,12 +28,12 @@ const RoundForm: React.FC<Props> = ({ onSubmit }) => {
   return (
     <div className={styles.formGroup} >
       <div className="flex mb-4">
-        <input  type="text" value={addressInput} onChange={e => setAddressInput(e.target.value)} placeholder="Enter address" className={styles.input}/>
-        <button onClick={addAddress} className={styles.addBtn}>Add</button>
+        <input  type="text" value={addressInput} onChange={e => setAddressInput(e.target.value)} placeholder="Entrer l'adresse" className={styles.input}/>
+        <button onClick={addAddress} className={styles.addBtn}>Ajouter</button>
       </div>
       <AddressList addresses={addresses} onDelete={deleteAddress} />
       <button className={styles.validateBtn} onClick={() => onSubmit(addresses)} disabled={addresses.length === 0}>
-        Validate addresses
+        Valider l'adresse
       </button>
     </div>
   );

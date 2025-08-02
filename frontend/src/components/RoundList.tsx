@@ -32,7 +32,7 @@ const RoundList: React.FC<Props> = ({ rounds }) => (
           <div className="flex justify-between items-center">
             <span>{r.date} ({steps?.length ?? 0} etapes)</span>
             <br/>
-            <Link to={`/round/${r.id}/optimize`} className="text-blue-600">Details </Link>
+            <Link to={`/round/${r.id}/optimize`} className="text-blue-600">Voir sur la carte</Link>
           </div>
           {steps.length > 0 && (
             <ul style={{ marginTop: 6, paddingLeft: 18 }}>
