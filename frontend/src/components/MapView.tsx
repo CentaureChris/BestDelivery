@@ -16,10 +16,12 @@ const icon = new L.Icon({
   iconAnchor: [12, 41],
 });
 
-type Props = { addresses: Address[] };
+type Props = { 
+  addresses: Address[]
+  polyline?: [number, number[] | null]
+};
 
-const MapView: React.FC<Props> = ({ addresses }) => {
-  console.log(addresses)
+const MapView: React.FC<Props> = ({ addresses, polyline }) => {
   const validAddresses = addresses
   .map(a => ({
     ...a,
@@ -29,6 +31,10 @@ const MapView: React.FC<Props> = ({ addresses }) => {
   .filter(
     a => typeof a.latitude === "number" && typeof a.longitude === "number" && !isNaN(a.latitude) && !isNaN(a.longitude)
   );
+
+  if (validAddresses.length === 0) {
+    return <div style={{ height: 350, background: "#e6ecfa" }}>No itinerary</div>;
+  }
 
   const waypoints = validAddresses.map(a => ({
     lat: a.latitude as number,
@@ -63,6 +69,7 @@ const MapView: React.FC<Props> = ({ addresses }) => {
           </Popup>
         </Marker>
       ))}
+      {polyline && <Polyline positions={polyline} color="#4094f7" weight={5} />}
       <RoutingMachine waypoints={waypoints} />
     </MapContainer>
   );

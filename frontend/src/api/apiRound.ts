@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Address } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";;
 
@@ -37,4 +38,14 @@ export async function deleteRound(id: number): Promise<void> {
 export async function getAddresses(id: number): Promise<void> {
   const response = await axios.get(`${API_BASE_URL}/rounds/${id}/addresses`);
   return response.data;
+}
+
+export async function optimizeRound(roundId: number) {
+  const response = await axios.post(`${API_BASE_URL}/rounds/${roundId}/optimize`);
+  return response.data as {
+    addresses: Address[];
+    ors_route: {
+      geometry: { coordinates: [number, number][] };
+    } | null;
+  };
 }

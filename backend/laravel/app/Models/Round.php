@@ -22,6 +22,7 @@ class Round extends Model
     {
         return $this->belongsToMany(Address::class,'address_round')
             ->withPivot('order')
-            ->withTimestamps();
+            ->withTimestamps()
+            ->orderBy('address_round.order');
     }
 }

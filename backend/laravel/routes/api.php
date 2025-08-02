@@ -18,4 +18,5 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('addresses', AddressController::class);
     Route::get('rounds/{id}/addresses', [RoundController::class, 'getAddresses']); // list of adresses on same round
     Route::post('rounds/{round}/addresses', [RoundController::class, 'attachAddresses']);
+    Route::post('rounds/{round}/optimize', [RoundController::class, 'optimize']);
 });

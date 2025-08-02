@@ -4,7 +4,7 @@ import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import MapView from "../components/MapView";
 import type { Address, Round } from "../types/index";
-import { getRound, getAddresses } from "../api/apiRound";
+import { getRound, getAddresses, optimizeRound } from "../api/apiRound";
 import commonStyles from "../assets/css/CommonStyles.module.css";
 
 const OptimizeRoundPage: React.FC = () => {
@@ -13,6 +13,8 @@ const OptimizeRoundPage: React.FC = () => {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [orsPolyline, setOrsPolyline] = useState<[number, number][] | null>(null);
+  const [optimizing, setOptimizing] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -35,6 +37,22 @@ const OptimizeRoundPage: React.FC = () => {
       });
   }, [id]);
 
+  const handleOptimize = async () => {
+    if (!id) return;
+    setOptimizing(true);
+    setError(null);
+    try {
+      const data = await optimizeRound(Number(id));
+      setAddresses(data.addresses); // met à jour l’ordre optimal
+      setOrsPolyline(
+        data.ors_route?.geometry?.coordinates.map(([lng, lat]) => [lat, lng]) ?? null
+      );
+    } catch (e: any) {
+      setError("Erreur lors de l’optimisation.");
+    }
+    setOptimizing(false);
+  };
+
   if (loading) return <div>Loading...</div>;
   if (error || !round) return <div>{error || "Round not found."}</div>;
 
@@ -46,14 +64,23 @@ const OptimizeRoundPage: React.FC = () => {
         <main className="flex-1 p-8">
           <h2 className="text-xl font-semibold mb-4">Optimize Your Round</h2>
           <div className="mb-4">
-            <button className="btn mr-2">Shortest</button>
-            <button className="btn mr-2">Fastest</button>
-            <button className="btn">Eco</button>
+            <div className="mb-4 flex gap-2">
+            
           </div>
-          <MapView addresses={addresses} />
+            {/* <button className="btn mr-2">Shortest</button>
+            <button className="btn mr-2">Fastest</button>
+            <button className="btn">Eco</button> */}
+          </div>
+          <MapView addresses={addresses} polyline={orsPolyline}/>
           <div className="mt-4 flex gap-4">
             <button className="btn">Edit Order</button>
-            <button className="btn">Recalculate</button>
+            <button
+              className="btn"
+              onClick={handleOptimize}
+              disabled={optimizing}
+            >
+              {optimizing ? "Optimizing..." : "Recalculate"}
+            </button>
             <button className="btn">Save</button>
             <button className="btn">Export PDF</button>
           </div>
