@@ -1,8 +1,8 @@
 export interface Address {
   id: number;
-  text: string;
-  latitude?: number;
-  longitude?: number;
+  address_text: string;
+  latitude?:  number | undefined;
+  longitude?:  number | undefined;
   order: number;
   delivered?: boolean;
   comment?: string;

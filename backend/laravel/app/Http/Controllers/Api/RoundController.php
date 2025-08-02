@@ -97,4 +97,24 @@ class RoundController extends Controller
 
         return response()->json(['message' => 'Round deleted successfully.']);
     }
+
+    /**
+     * Get list of addresses for a round
+     */
+    public function getAddresses(Request $request, string $id)
+    {
+        $user = $request->user();
+
+        // On récupère la tournée de l'utilisateur connecté
+        $round = Round::where('id', $id)->where('user_id', $user->id)->first();
+
+        if (!$round) {
+            return response()->json(['message' => 'Round not found'], 404);
+        }
+
+        // On récupère les adresses liées à cette tournée
+        $addresses = $round->addresses()->orderBy('order')->get();
+
+        return response()->json($addresses);
+    }
 }

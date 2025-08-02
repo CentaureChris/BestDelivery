@@ -33,3 +33,8 @@ export async function updateRound(id: number, data: Partial<Omit<Round, "id">>):
 export async function deleteRound(id: number): Promise<void> {
   await axios.delete(`${API_BASE_URL}/rounds/${id}`);
 }
+
+export async function getAddresses(id: number): Promise<void> {
+  const response = await axios.get(`${API_BASE_URL}/rounds/${id}/addresses`);
+  return response.data;
+}

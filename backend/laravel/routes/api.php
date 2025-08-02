@@ -16,6 +16,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('rounds', RoundController::class);
     Route::apiResource('addresses', AddressController::class);
-    Route::get('rounds/{round}/addresses', [RoundController::class, 'getAdresses']); // list of adresses on same round
+    Route::get('rounds/{id}/addresses', [RoundController::class, 'getAddresses']); // list of adresses on same round
     Route::post('rounds/{round}/addresses', [RoundController::class, 'attachAddresses']);
 });
