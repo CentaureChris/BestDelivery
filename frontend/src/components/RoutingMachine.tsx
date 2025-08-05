@@ -20,6 +20,7 @@ const RoutingMachine: React.FC<Props> = ({ waypoints }) => {
     }
 
     const routingControl = L.Routing.control({
+      language: 'fr',
       waypoints: waypoints.map((wp) => L.latLng(wp.lat, wp.lng)),
       routeWhileDragging: false,
       show: true,

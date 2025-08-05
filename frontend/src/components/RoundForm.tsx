@@ -1,41 +1,60 @@
 import React, { useState } from "react";
-import { type Address } from "../types/index";
-import AddressList from "./AddressList";
+import { geocodeAddress } from "../api/geocode.tsx";
+import { saveAddress } from "../api/apiAddress";
 import styles from "../assets/css/RoundForm.module.css"
 
-type Props = {
-  onSubmit: (addresses: Address[]) => void;
-};
 
-const RoundForm: React.FC<Props> = ({ onSubmit }) => {
-  const [addresses, setAddresses] = useState<Address[]>([]);
-  const [addressInput, setAddressInput] = useState("");
+const RoundForm: React.FC = () => {
+  const [addressText, setAddressText] = useState("");
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
 
-  const addAddress = () => {
-    if (addressInput.trim()) {
-      setAddresses([
-        ...addresses,
-        { id: Date.now(), text: addressInput, order: addresses.length + 1 }
-      ]);
-      setAddressInput("");
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError(null);
+    setSuccess(null);
+
+    if (!addressText.trim()) {
+      setError("Please enter an address.");
+      return;
+    }
+
+    // 1. Geocode the address
+    const coords = await geocodeAddress(addressText);
+    if (!coords) {
+      setError("Address not found.");
+      return;
+    }
+
+    // 2. Save to backend
+    try {
+      await saveAddress({
+        address_text: addressText,
+        latitude: coords.lat,
+        longitude: coords.lon,
+        order: 1,       // ou la valeur correcte dans ta logique
+        delivered: false,
+      });
+      setSuccess("Address saved!");
+      setAddressText(""); // reset input
+    } catch (e) {
+      setError("Could not save address.");
     }
   };
 
-  const deleteAddress = (id: number) => {
-    setAddresses(addresses.filter(addr => addr.id !== id));
-  };
-
   return (
-    <div className={styles.formGroup} >
-      <div className="flex mb-4">
-        <input  type="text" value={addressInput} onChange={e => setAddressInput(e.target.value)} placeholder="Entrer l'adresse" className={styles.input}/>
-        <button onClick={addAddress} className={styles.addBtn}>Ajouter</button>
-      </div>
-      <AddressList addresses={addresses} onDelete={deleteAddress} />
-      <button className={styles.validateBtn} onClick={() => onSubmit(addresses)} disabled={addresses.length === 0}>
-        Valider l'adresse
-      </button>
-    </div>
+    <form onSubmit={handleSubmit}>
+      <input
+        className={styles.input}
+        type="text"
+        placeholder="Enter address"
+        value={addressText}
+        onChange={e => setAddressText(e.target.value)}
+      />
+      <button type="submit">Add address</button>
+      {error && <div style={{ color: "red" }}>{error}</div>}
+      {success && <div style={{ color: "green" }}>{success}</div>}
+    </form>
   );
 };
 

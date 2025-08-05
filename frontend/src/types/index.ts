@@ -1,4 +1,4 @@
-export interface Address {
+export interface AddressRound {
   id: number;
   address_text: string;
   latitude?:  number | undefined;
