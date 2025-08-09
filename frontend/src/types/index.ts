@@ -11,7 +11,7 @@ export interface AddressRound {
 export interface Round {
   id: number;
   date: string;
-  itinerary: Address[];
+  itinerary: AddressRound[];
   type_optimisation: 'shortest' | 'fastest' | 'eco';
   user_id: number;
 }

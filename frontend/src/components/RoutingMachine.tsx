@@ -3,45 +3,30 @@ import L from "leaflet";
 import "leaflet-routing-machine";
 import { useMap } from "react-leaflet";
 
-type Props = {
-  waypoints: { lat: number; lng: number }[];
-};
+type WP = { lat: number; lng: number };
 
-const RoutingMachine: React.FC<Props> = ({ waypoints }) => {
+const RoutingMachine: React.FC<{ waypoints: WP[] }> = ({ waypoints }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!map || !waypoints.length) return;
+    if (!map || waypoints.length === 0) return;
 
-    // Remove previous routes if any
-    if (map._routingControl) {
-      map.removeControl(map._routingControl);
-      map._routingControl = undefined;
-    }
-
-    const routingControl = L.Routing.control({
-      language: 'fr',
-      waypoints: waypoints.map((wp) => L.latLng(wp.lat, wp.lng)),
+    const ctrl = L.Routing.control({
+      waypoints: waypoints.map(wp => L.latLng(wp.lat, wp.lng)),
       routeWhileDragging: false,
-      show: true,
       addWaypoints: false,
       draggableWaypoints: false,
       fitSelectedRoutes: true,
+      show: false,
       lineOptions: {
         styles: [{ color: "#4094f7", weight: 3 }]
       },
-      createMarker: function(i, wp) {
-        return L.marker(wp.latLng);
-      },
+      // 🔑 don't draw LRM markers; we'll render our own in MapView
+      createMarker: () => null,
     }).addTo(map);
 
-    map._routingControl = routingControl;
-
     return () => {
-      if (map._routingControl) {
-        map.removeControl(map._routingControl);
-        map._routingControl = undefined;
-      }
+      map.removeControl(ctrl);
     };
   }, [map, waypoints]);
 

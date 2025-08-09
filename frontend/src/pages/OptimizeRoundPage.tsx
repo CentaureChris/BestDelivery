@@ -3,7 +3,7 @@ import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import MapView from "../components/MapView";
-import type { Address, Round } from "../types/index";
+import type { AddressRound, Round } from "../types/index";
 import { getRound, getAddresses, optimizeRound } from "../api/apiRound";
 import commonStyles from "../assets/css/CommonStyles.module.css";
 import styles from "../assets/css/OptimizeRoundPage.module.css"
@@ -12,7 +12,7 @@ import styles from "../assets/css/OptimizeRoundPage.module.css"
 const OptimizeRoundPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [round, setRound] = useState<Round | null>(null);
-  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addresses, setAddresses] = useState<AddressRound[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [orsPolyline, setOrsPolyline] = useState<[number, number][] | null>(null);
@@ -69,9 +69,6 @@ const OptimizeRoundPage: React.FC = () => {
             <div className="mb-4 flex gap-2">
             
           </div>
-            {/* <button className="btn mr-2">Shortest</button>
-            <button className="btn mr-2">Fastest</button>
-            <button className="btn">Eco</button> */}
           </div>
           <MapView addresses={addresses} polyline={orsPolyline}/>
           <div className={styles.bottomBarButton}>
