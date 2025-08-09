@@ -1,60 +1,92 @@
 import React, { useState } from "react";
-import { geocodeAddress } from "../api/geocode.tsx";
-import { saveAddress } from "../api/apiAddress";
-import styles from "../assets/css/RoundForm.module.css"
-
+import styles from "../assets/css/RoundForm.module.css";
+import { geocodeAddress } from "../api/geocode";
+import { createRound, attachAddressToRound } from "../api/apiRound";
 
 const RoundForm: React.FC = () => {
   const [addressText, setAddressText] = useState("");
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+  const [currentRoundId, setCurrentRoundId] = useState<number | null>(null);
+  const [currentOrder, setCurrentOrder] = useState(1); // start order at 1
+  const [message, setMessage] = useState<string | null>(null);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleAddAddress = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
-    setSuccess(null);
+    setMessage(null);
 
     if (!addressText.trim()) {
-      setError("Please enter an address.");
+      setMessage("Veuillez entrer une adresse.");
       return;
     }
 
-    // 1. Geocode the address
+    // 1. Geocode
     const coords = await geocodeAddress(addressText);
     if (!coords) {
-      setError("Address not found.");
+      setMessage("Adresse introuvable.");
       return;
     }
 
-    // 2. Save to backend
     try {
-      await saveAddress({
+      let roundId = currentRoundId;
+
+      // 2. Create new round if none in progress
+      if (!roundId) {
+        const newRound = await createRound({
+          name: "Nouvelle tournée",
+          date: new Date().toISOString().split("T")[0],
+          type_optimisation: "shortest",
+        });
+        roundId = newRound.id;
+        setCurrentRoundId(roundId);
+        setCurrentOrder(1); // reset order for new round
+        setMessage(`Tournée #${roundId} créée.`);
+      }
+
+      // 3. Attach address with current order
+      await attachAddressToRound(roundId!, {
         address_text: addressText,
         latitude: coords.lat,
         longitude: coords.lon,
-        order: 1,       // ou la valeur correcte dans ta logique
+        order: currentOrder,
         delivered: false,
       });
-      setSuccess("Address saved!");
-      setAddressText(""); // reset input
-    } catch (e) {
-      setError("Could not save address.");
+
+      setMessage(`Adresse ajoutée (ordre ${currentOrder}) à la tournée #${roundId}`);
+      setAddressText("");
+      setCurrentOrder(prev => prev + 1); // increment for next address
+    } catch (error) {
+      setMessage("Erreur lors de l'enregistrement.");
     }
   };
 
+  const handleEndRound = () => {
+    setMessage(`Tournée #${currentRoundId} terminée.`);
+    setCurrentRoundId(null);
+    setCurrentOrder(1); // reset order counter for next round
+  };
+
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        className={styles.input}
-        type="text"
-        placeholder="Enter address"
-        value={addressText}
-        onChange={e => setAddressText(e.target.value)}
-      />
-      <button type="submit">Add address</button>
-      {error && <div style={{ color: "red" }}>{error}</div>}
-      {success && <div style={{ color: "green" }}>{success}</div>}
-    </form>
+    <main className="p-8">
+      <form onSubmit={handleAddAddress} className="mb-4 flex gap-2">
+        <input
+          type="text"
+          value={addressText}
+          onChange={e => setAddressText(e.target.value)}
+          placeholder="Saisir une adresse"
+          className={styles.input}
+        />
+        <button type="submit" className="btn">
+          Ajouter
+        </button>
+      </form>
+
+      {currentRoundId && (
+        <button onClick={handleEndRound} className="btn bg-red-500 text-white">
+          Fin de tournée
+        </button>
+      )}
+
+      {message && <div className="mt-4 text-sm text-blue-600">{message}</div>}
+    </main>
   );
 };
 

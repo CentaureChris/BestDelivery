@@ -16,9 +16,15 @@ export async function fetchRounds(): Promise<Round[]> {
   return response.data;
 }
 
-export async function createRound(data: Omit<Round, "id">): Promise<Round> {
-  const response = await axios.post(`${API_BASE_URL}/rounds`, data);
-  return response.data;
+
+export async function createRound(data: { name: string; date: string; type_optimisation: string }) {
+  const res = await axios.post(`${API_BASE_URL}/rounds`, data);
+  return res.data;
+}
+
+export async function attachAddressToRound(roundId: number, address: Partial<AddressRound>) {
+  const res = await axios.post(`${API_BASE_URL}/rounds/${roundId}/addresses`, address);
+  return res.data;
 }
 
 export async function getRound(id: number): Promise<Round> {

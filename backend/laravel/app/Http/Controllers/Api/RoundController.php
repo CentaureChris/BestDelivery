@@ -3,8 +3,10 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Round;
+use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Http;
@@ -30,7 +32,7 @@ class RoundController extends Controller
         $validated = $request->validate([
             'date' => 'required|date',
             'type_optimisation' => ['required', Rule::in(['shortest', 'fastest', 'eco'])],
-            'itinerary' => 'required|string|max:255',
+            'itinerary' => 'string|max:255',
         ]);
 
         $validated['user_id'] = $user->id;
@@ -216,5 +218,93 @@ class RoundController extends Controller
             'addresses' => $orderedAddresses,
             'solution' => $solution,
         ]);
+    }
+
+    public function attachAddresses(Request $request, Round $round)
+    {
+        // Security: only the owner can modify
+        if ($request->user()->id !== $round->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        // Normalize payload: allow single or multiple
+        $payload = $request->all();
+        $items = isset($payload['addresses'])
+            ? $payload['addresses']
+            : [$payload]; // single object
+
+        // Validation rules for each address
+        $rules = [
+            'address_text' => ['required', 'string', 'max:255'],
+            'latitude'     => ['required', 'numeric'],
+            'longitude'    => ['required', 'numeric'],
+            'order'        => ['nullable', 'integer', 'min:1'],
+            'delivered'    => ['nullable', 'boolean'],
+        ];
+
+        // Run everything in a transaction
+        $attached = [];
+        DB::beginTransaction();
+        try {
+            // Determine the next order if not provided
+            // (reads current max from pivot)
+            $currentMax = (int) $round->addresses()->max('address_round.order');
+            $nextOrder  = $currentMax > 0 ? $currentMax + 1 : 1;
+
+            foreach ($items as $i => $item) {
+                $validated = validator($item, $rules)->validate();
+
+                // Defaults
+                $validated['delivered'] = $validated['delivered'] ?? false;
+
+                // Create the Address row
+                $address = Address::create([
+                    'address_text' => $validated['address_text'],
+                    'latitude'     => $validated['latitude'],
+                    'longitude'    => $validated['longitude'],
+                    // facultatif si tu stockes aussi order/delivered dans la table addresses
+                    'order'        => $validated['order'] ?? null,
+                    'delivered'    => $validated['delivered'],
+                ]);
+
+                // Choose pivot order: provided or auto-increment
+                $pivotOrder = $validated['order'] ?? $nextOrder++;
+                // Attach without detaching others
+                $round->addresses()->syncWithoutDetaching([
+                    $address->id => [
+                        'order'     => $pivotOrder,
+                        'delivered' => $validated['delivered'],
+                    ]
+                ]);
+
+                $attached[] = $address;
+            }
+
+            // --- NEW: Update itinerary JSON ---
+            $steps = $round->addresses()
+                ->orderBy('address_round.order')
+                ->pluck('address_text')
+                ->toArray();
+
+            $round->itinerary = json_encode(['steps' => $steps]);
+            $round->save();
+
+            DB::commit();
+
+            // Return addresses of this round in the new order
+            $ordered = $round->addresses()->orderBy('address_round.order')->get();
+
+            return response()->json([
+                'message'   => 'Addresses attached successfully.',
+                'addresses' => $ordered,
+                'itinerary' => $round->itinerary
+            ], 201);
+        } catch (\Throwable $e) {
+            DB::rollBack();
+            return response()->json([
+                'message' => 'Failed to attach addresses.',
+                'error'   => $e->getMessage(),
+            ], 422);
+        }
     }
 }
