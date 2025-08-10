@@ -222,18 +222,15 @@ class RoundController extends Controller
 
     public function attachAddresses(Request $request, Round $round)
     {
-        // Security: only the owner can modify
         if ($request->user()->id !== $round->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
 
-        // Normalize payload: allow single or multiple
         $payload = $request->all();
         $items = isset($payload['addresses'])
             ? $payload['addresses']
-            : [$payload]; // single object
+            : [$payload];
 
-        // Validation rules for each address
         $rules = [
             'address_text' => ['required', 'string', 'max:255'],
             'latitude'     => ['required', 'numeric'],
@@ -242,34 +239,26 @@ class RoundController extends Controller
             'delivered'    => ['nullable', 'boolean'],
         ];
 
-        // Run everything in a transaction
         $attached = [];
         DB::beginTransaction();
         try {
-            // Determine the next order if not provided
-            // (reads current max from pivot)
             $currentMax = (int) $round->addresses()->max('address_round.order');
             $nextOrder  = $currentMax > 0 ? $currentMax + 1 : 1;
 
             foreach ($items as $i => $item) {
                 $validated = validator($item, $rules)->validate();
-
-                // Defaults
                 $validated['delivered'] = $validated['delivered'] ?? false;
-
-                // Create the Address row
                 $address = Address::create([
                     'address_text' => $validated['address_text'],
                     'latitude'     => $validated['latitude'],
                     'longitude'    => $validated['longitude'],
-                    // facultatif si tu stockes aussi order/delivered dans la table addresses
                     'order'        => $validated['order'] ?? null,
                     'delivered'    => $validated['delivered'],
                 ]);
 
-                // Choose pivot order: provided or auto-increment
+
                 $pivotOrder = $validated['order'] ?? $nextOrder++;
-                // Attach without detaching others
+
                 $round->addresses()->syncWithoutDetaching([
                     $address->id => [
                         'order'     => $pivotOrder,
@@ -280,7 +269,6 @@ class RoundController extends Controller
                 $attached[] = $address;
             }
 
-            // --- NEW: Update itinerary JSON ---
             $steps = $round->addresses()
                 ->orderBy('address_round.order')
                 ->pluck('address_text')
@@ -291,7 +279,6 @@ class RoundController extends Controller
 
             DB::commit();
 
-            // Return addresses of this round in the new order
             $ordered = $round->addresses()->orderBy('address_round.order')->get();
 
             return response()->json([
@@ -306,5 +293,64 @@ class RoundController extends Controller
                 'error'   => $e->getMessage(),
             ], 422);
         }
+    }
+
+    public function reorderAddresses(Request $request, Round $round)
+    {
+        if ($request->user()->id !== $round->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $data = $request->validate([
+            'address_ids' => ['required', 'array', 'min:1'],
+            'address_ids.*' => ['integer', 'exists:addresses,id'],
+        ]);
+
+        // Ensure all ids belong to this round
+        $count = $round->addresses()->whereIn('addresses.id', $data['address_ids'])->count();
+        if ($count !== count($data['address_ids'])) {
+            return response()->json(['message' => 'Some addresses do not belong to this round'], 422);
+        }
+
+        DB::transaction(function () use ($round, $data) {
+            foreach ($data['address_ids'] as $idx => $addressId) {
+                $round->addresses()->updateExistingPivot($addressId, ['order' => $idx + 1]);
+            }
+        });
+
+        $addresses = $round->addresses()->orderBy('address_round.order')->get();
+        return response()->json(['addresses' => $addresses]);
+    }
+
+    public function updatePivot(Request $request, Round $round, Address $address)
+    {
+        // security
+        if ($request->user()->id !== $round->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $data = $request->validate([
+            'delivered' => ['sometimes', 'boolean'],
+            'order'     => ['sometimes', 'integer', 'min:1'],
+        ]);
+
+        // ensure address belongs to the round
+        if (!$round->addresses()->where('addresses.id', $address->id)->exists()) {
+            return response()->json(['message' => 'Address not in this round'], 404);
+        }
+
+        // update only provided fields
+        $pivotData = [];
+        if (array_key_exists('delivered', $data)) $pivotData['delivered'] = $data['delivered'];
+        if (array_key_exists('order', $data))     $pivotData['order']     = $data['order'];
+
+        if (!empty($pivotData)) {
+            $round->addresses()->updateExistingPivot($address->id, $pivotData);
+        }
+
+        // return fresh ordered list
+        $addresses = $round->addresses()->orderBy('address_round.order')->get();
+
+        return response()->json(['addresses' => $addresses]);
     }
 }

@@ -55,3 +55,25 @@ export async function optimizeRound(roundId: number) {
     } | null;
   };
 }
+
+export async function updateRoundAddress(
+  roundId: number,
+  addressId: number,
+  data: { delivered?: boolean; order?: number }
+): Promise<{ addresses: AddressRound[] }> {
+  const res = await axios.patch(`${API_BASE_URL}/rounds/${roundId}/addresses/${addressId}`, data);
+  return res.data;
+}
+
+export async function reorderRoundAddresses(roundId: number, addressIds: number) {
+  // typo guard — just in case
+  console.warn("reorderRoundAddresses: expected number[] for "+roundId+" instead of "+addressIds); 
+  return { addresses: [] as AddressRound[] };
+}
+
+export async function reorderRoundAddressesIds(roundId: number, addressIds: number[]) {
+  const res = await axios.patch(`${API_BASE_URL}/rounds/${roundId}/addresses/bulk-reorder`, {
+    address_ids: addressIds,
+  });
+  return res.data;
+}

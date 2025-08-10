@@ -2,12 +2,13 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
+// import RoundStopsEditor from "../components/RoundStopsEditor";
+import RoundStopsEditorDnD from "../components/RoundStopsEditorDnD";
 import MapView from "../components/MapView";
 import type { AddressRound, Round } from "../types/index";
 import { getRound, getAddresses, optimizeRound } from "../api/apiRound";
 import commonStyles from "../assets/css/CommonStyles.module.css";
-import styles from "../assets/css/OptimizeRoundPage.module.css"
-
+import styles from "../assets/css/OptimizeRoundPage.module.css";
 
 const OptimizeRoundPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -15,8 +16,11 @@ const OptimizeRoundPage: React.FC = () => {
   const [addresses, setAddresses] = useState<AddressRound[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [orsPolyline, setOrsPolyline] = useState<[number, number][] | null>(null);
+  const [orsPolyline, setOrsPolyline] = useState<[number, number][] | null>(
+    null
+  );
   const [optimizing, setOptimizing] = useState(false);
+  const [showEditor, setShowEditor] = useState(false);
 
   useEffect(() => {
     if (!id) return;
@@ -24,17 +28,14 @@ const OptimizeRoundPage: React.FC = () => {
     setLoading(true);
     setError(null);
 
-    Promise.all([
-      getRound(Number(id)),
-      getAddresses(Number(id))
-    ])
+    Promise.all([getRound(Number(id)), getAddresses(Number(id))])
       .then(([roundData, addressesData]) => {
         setRound(roundData);
         setAddresses(addressesData);
         setLoading(false);
       })
-      .catch((err) => {
-        setError("Failed to load round or addresses.");
+      .catch(err => {
+        setError("Failed to load round or addresses." + err.message);
         setLoading(false);
       });
   }, [id]);
@@ -47,10 +48,11 @@ const OptimizeRoundPage: React.FC = () => {
       const data = await optimizeRound(Number(id));
       setAddresses(data.addresses); // met à jour l’ordre optimal
       setOrsPolyline(
-        data.ors_route?.geometry?.coordinates.map(([lng, lat]) => [lat, lng]) ?? null
+        data.ors_route?.geometry?.coordinates.map(([lng, lat]) => [lat, lng]) ??
+          null
       );
     } catch (e: any) {
-      setError("Erreur lors de l’optimisation.");
+      setError("Erreur lors de l’optimisation." + e.message);
     }
     setOptimizing(false);
   };
@@ -64,15 +66,16 @@ const OptimizeRoundPage: React.FC = () => {
       <div className={commonStyles.mainContent}>
         <Navbar />
         <main className="flex-1 p-8">
-          <h2 className="text-xl font-semibold mb-4">Optimiser votre tournée</h2>
+          <h2 className="text-xl font-semibold mb-4">
+            Optimiser votre tournée
+          </h2>
           <div className="mb-4">
-            <div className="mb-4 flex gap-2">
-            
+            <div className="mb-4 flex gap-2"></div>
           </div>
-          </div>
-          <MapView addresses={addresses} polyline={orsPolyline}/>
           <div className={styles.bottomBarButton}>
-            <button className="btn">Edit Order</button>
+            <button className="btn" onClick={() => setShowEditor(v => !v)}>
+              {showEditor ? "Masquer l’édition" : "Edit Order"}
+            </button>
             <button
               className="btn"
               onClick={handleOptimize}
@@ -83,6 +86,14 @@ const OptimizeRoundPage: React.FC = () => {
             {/* <button className="btn">Save</button> */}
             <button className="btn">Export PDF</button>
           </div>
+          <MapView addresses={addresses} polyline={orsPolyline} />
+          {showEditor && round && (
+            <RoundStopsEditorDnD
+              roundId={round.id}
+              addresses={addresses}
+              onAddressesChange={setAddresses}
+            />
+          )}
         </main>
       </div>
     </div>

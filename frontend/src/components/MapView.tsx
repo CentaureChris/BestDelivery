@@ -10,13 +10,11 @@ import L from "leaflet";
 import RoutingMachine from "./RoutingMachine";
 import { type AddressRound } from "../types/index";
 
-// ✅ Import marker images so Vite bundles them
 import blueMarkerUrl from "leaflet/dist/images/marker-icon.png";
 import greenMarkerUrl from "../assets/images/marker-icon-2x-green.png";
 import redMarkerUrl from "../assets/images/marker-icon-2x-red.png";
 import shadowUrl from "leaflet/dist/images/marker-shadow.png";
 
-// ✅ Create distinct icon instances
 delete L.Icon.Default.prototype._getIconUrl;
 const iconBlue = new L.Icon({
   iconUrl: blueMarkerUrl,
@@ -91,14 +89,13 @@ const MapView: React.FC<Props> = ({ addresses, polyline }) => {
 
       {validAddresses.map((a, i) => {
         let icon = iconBlue;
-        if (i === 0) icon = iconGreen; // start
-        else if (i === validAddresses.length - 1) icon = iconRed; // end
-
+        if (i === 0) icon = iconGreen; 
+        else if (i === validAddresses.length - 1) icon = iconRed; 
         return (
           <Marker
             key={i}
             position={[a.latitude as number, a.longitude as number]}
-            icon={icon} // ✅ This now uses your imported icons
+            icon={icon} 
           >
             <Popup>
               <b>Stop {i + 1}</b>

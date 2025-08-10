@@ -12,16 +12,16 @@ const RoutingMachine: React.FC<{ waypoints: WP[] }> = ({ waypoints }) => {
     if (!map || waypoints.length === 0) return;
 
     const ctrl = L.Routing.control({
+      language: 'fr',
       waypoints: waypoints.map(wp => L.latLng(wp.lat, wp.lng)),
       routeWhileDragging: false,
       addWaypoints: false,
       draggableWaypoints: false,
       fitSelectedRoutes: true,
-      show: false,
+      show: true,
       lineOptions: {
         styles: [{ color: "#4094f7", weight: 3 }]
       },
-      // 🔑 don't draw LRM markers; we'll render our own in MapView
       createMarker: () => null,
     }).addTo(map);
 

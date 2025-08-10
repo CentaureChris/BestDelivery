@@ -16,7 +16,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::apiResource('rounds', RoundController::class);
     Route::apiResource('addresses', AddressController::class);
-    Route::get('rounds/{id}/addresses', [RoundController::class, 'getAddresses']); // list of adresses on same round
+    Route::get('rounds/{id}/addresses', [RoundController::class, 'getAddresses']);
     Route::post('rounds/{round}/addresses', [RoundController::class, 'attachAddresses']);
     Route::post('rounds/{round}/optimize', [RoundController::class, 'optimize']);
-});
+    Route::patch('rounds/{round}/addresses/reorder', [RoundController::class, 'reorderAddresses'])->whereNumber('round');
+Route::patch('rounds/{round}/addresses/bulk-reorder', [RoundController::class, 'reorderAddresses'])
+    ->whereNumber('round');});
