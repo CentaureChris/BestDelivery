@@ -297,29 +297,28 @@ class RoundController extends Controller
 
     public function reorderAddresses(Request $request, Round $round)
     {
+        // security
         if ($request->user()->id !== $round->user_id) {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-
-        $data = $request->validate([
-            'address_ids' => ['required', 'array', 'min:1'],
-            'address_ids.*' => ['integer', 'exists:addresses,id'],
-        ]);
-
-        // Ensure all ids belong to this round
-        $count = $round->addresses()->whereIn('addresses.id', $data['address_ids'])->count();
-        if ($count !== count($data['address_ids'])) {
-            return response()->json(['message' => 'Some addresses do not belong to this round'], 422);
+        $ids = $request->input('address_ids', []);
+        foreach ($ids as $order => $id) {
+            $round->addresses()->updateExistingPivot($id, ['order' => $order + 1]);
         }
 
-        DB::transaction(function () use ($round, $data) {
-            foreach ($data['address_ids'] as $idx => $addressId) {
-                $round->addresses()->updateExistingPivot($addressId, ['order' => $idx + 1]);
-            }
-        });
+        return response()->json(['message' => 'Order updated']);
+    }
 
-        $addresses = $round->addresses()->orderBy('address_round.order')->get();
-        return response()->json(['addresses' => $addresses]);
+    public function updateDelivered(Request $request, Round $round, Address $address)
+    {
+        // security
+        if ($request->user()->id !== $round->user_id) {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+        $delivered = (bool) $request->input('delivered');
+        $round->addresses()->updateExistingPivot($address->id, ['delivered' => $delivered]);
+
+        return response()->json(['message' => 'Delivered status updated']);
     }
 
     public function updatePivot(Request $request, Round $round, Address $address)

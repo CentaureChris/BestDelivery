@@ -80,7 +80,7 @@ const MapView: React.FC<Props> = ({ addresses, polyline }) => {
       center={center}
       zoom={13}
       scrollWheelZoom={true}
-      style={{ height: "70vh", borderRadius: 16, margin: "1rem 1rem" }}
+      style={{ height: "45vh", borderRadius: 16, margin: "1rem 1rem" }}
     >
       <TileLayer
         attribution='&copy; OpenStreetMap'

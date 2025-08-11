@@ -19,6 +19,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('rounds/{id}/addresses', [RoundController::class, 'getAddresses']);
     Route::post('rounds/{round}/addresses', [RoundController::class, 'attachAddresses']);
     Route::post('rounds/{round}/optimize', [RoundController::class, 'optimize']);
-    Route::patch('rounds/{round}/addresses/reorder', [RoundController::class, 'reorderAddresses'])->whereNumber('round');
-Route::patch('rounds/{round}/addresses/bulk-reorder', [RoundController::class, 'reorderAddresses'])
-    ->whereNumber('round');});
+    Route::patch('rounds/{round}/addresses/reorder', [RoundController::class, 'reorderAddresses']);
+    Route::patch('rounds/{round}/addresses/{address}', [RoundController::class, 'updatePivot']);
+    Route::patch('rounds/{round}/addresses/{address}/delivered', [RoundController::class, 'updateDelivered'])->whereNumber('round')->whereNumber('address');
+});

@@ -72,8 +72,15 @@ export async function reorderRoundAddresses(roundId: number, addressIds: number)
 }
 
 export async function reorderRoundAddressesIds(roundId: number, addressIds: number[]) {
-  const res = await axios.patch(`${API_BASE_URL}/rounds/${roundId}/addresses/bulk-reorder`, {
-    address_ids: addressIds,
+  const res = await axios.patch(`${API_BASE_URL}/rounds/${roundId}/addresses/reorder`, {
+    address_ids: addressIds
+  });
+  return res.data;
+}
+
+export async function updateAddressDelivered(roundId: number, addressId: number, delivered: boolean) {
+  const res = await axios.patch(`${API_BASE_URL}/rounds/${roundId}/addresses/${addressId}/delivered`, {
+    delivered
   });
   return res.data;
 }

@@ -1,90 +1,106 @@
-import React, { useMemo, useState } from "react";
-import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import type { DropResult } from '@hello-pangea/dnd';
+import React, { useEffect, useState } from "react";
+import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import type { DropResult } from "@hello-pangea/dnd";
 import type { AddressRound } from "../types";
-import { reorderRoundAddressesIds } from "../api/apiRound";
+import { reorderRoundAddressesIds, updateAddressDelivered } from "../api/apiRound";
 
-type Props = {
+interface Props {
   roundId: number;
-  addresses: AddressRound[];
-  onAddressesChange: (a: AddressRound[]) => void;
-};
+  addresses: AddressRound[]; // <- matches parent
+  onAddressesChange: (addrs: AddressRound[]) => void; // <- matches parent
+}
 
-const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses, onAddressesChange }) => {
-  const [saving, setSaving] = useState(false);
+const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddresses, onAddressesChange }) => {
+  const [addresses, setAddresses] = useState<AddressRound[]>(propsAddresses ?? []);
+  const [savingId, setSavingId] = useState<number | null>(null);
 
-  const ordered = useMemo(() => {
-    return [...addresses].sort((a, b) => {
-      const oa = (a as any).pivot?.order ?? (a as any).order ?? 0;
-      const ob = (b as any).pivot?.order ?? (b as any).order ?? 0;
-      return oa - ob;
-    });
-  }, [addresses]);
+  // keep local list in sync with parent changes
+  useEffect(() => {
+    setAddresses(propsAddresses ?? []);
+  }, [propsAddresses]);
 
-  const onDragEnd = async (result: DropResult) => {
+  const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
-    const items = Array.from(ordered);
-    const [moved] = items.splice(result.source.index, 1);
-    items.splice(result.destination.index, 0, moved);
+    const newOrder = Array.from(addresses);
+    const [moved] = newOrder.splice(result.source.index, 1);
+    newOrder.splice(result.destination.index, 0, moved);
 
-    // optimistic UI: compute new order IDs
-    const newIds = items.map(a => a.id);
-    setSaving(true);
+    setAddresses(newOrder); // optimistic
+    onAddressesChange(newOrder); // reflect in parent immediately
+
     try {
-      const { addresses: updated } = await reorderRoundAddressesIds(roundId, newIds);
-      onAddressesChange(updated);
+      await reorderRoundAddressesIds(
+        roundId,
+        newOrder.map(a => a.id)
+      );
+      // Optionally refetch here if backend adjusts anything
     } catch (e) {
+      // revert on error
+      setAddresses(propsAddresses);
+      onAddressesChange(propsAddresses);
       console.error(e);
-      // optional: toast error and revert
-    } finally {
-      setSaving(false);
     }
   };
 
+  const handleDeliveredChange = async (addressId: number, delivered: boolean) => {
+    // optimistic
+    const next = addresses.map(a => (a.id === addressId ? { ...a, delivered } : a));
+    setAddresses(next);
+    onAddressesChange(next);
+
+    try {
+      setSavingId(addressId);
+      await updateAddressDelivered(roundId, addressId, delivered);
+    } catch (e) {
+      // revert on error
+      const reverted = addresses.map(a => (a.id === addressId ? { ...a, delivered: !delivered } : a));
+      setAddresses(reverted);
+      onAddressesChange(reverted);
+      console.error(e);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  if (!addresses || addresses.length === 0) {
+    return <div className="text-sm text-gray-500 mt-4">Aucune adresse à afficher.</div>;
+  }
+
   return (
     <div className="mt-6">
-      <div className="flex items-center justify-between mb-2">
-        <h3 className="text-lg font-semibold">Réordonner les étapes</h3>
-        {saving && <span className="text-sm text-gray-500">Sauvegarde…</span>}
-      </div>
-      <DragDropContext onDragEnd={onDragEnd}>
-        <Droppable droppableId="stops">
-          {(provided) => (
-            <div
-              ref={provided.innerRef}
-              {...provided.droppableProps}
-              className="border rounded-md divide-y"
-            >
-              {ordered.map((a, idx) => (
-                <Draggable key={a.id} draggableId={String(a.id)} index={idx}>
-                  {(prov, snapshot) => (
-                    <div
-                      ref={prov.innerRef}
-                      {...prov.draggableProps}
-                      {...prov.dragHandleProps}
-                      className={`p-3 flex items-center justify-between bg-white ${
-                        snapshot.isDragging ? "shadow-md" : ""
-                      }`}
+      <h3 className="text-lg font-semibold mb-3">Étapes</h3>
+      <DragDropContext onDragEnd={handleDragEnd}>
+        <Droppable droppableId="address-list">
+          {provided => (
+            <ul {...provided.droppableProps} ref={provided.innerRef} className="space-y-2">
+              {addresses.map((a, index) => (
+                <Draggable key={a.id} draggableId={a.id.toString()} index={index}>
+                  {provided => (
+                    <li
+                      ref={provided.innerRef}
+                      {...provided.draggableProps}
+                      {...provided.dragHandleProps}
+                      className="p-3 bg-white rounded shadow flex items-center justify-between"
                     >
-                      <div className="flex items-center gap-3">
-                        <span className="w-6 text-gray-600 text-sm">{idx + 1}</span>
-                        <div className="text-sm">
-                          <div className="font-medium">{a.address_text}</div>
-                          <div className="text-xs text-gray-500">
-                            {Number(a.latitude).toFixed(5)}, {Number(a.longitude).toFixed(5)}
-                          </div>
-                        </div>
-                      </div>
-                      <span className="text-xs px-2 py-1 rounded bg-gray-100">
-                        {(a as any).pivot?.delivered ? "Livré" : "À livrer"}
+                      <span className="text-sm">
+                        {index + 1}. {a.address_text}
                       </span>
-                    </div>
+                      <label className="flex items-center space-x-2 text-sm">
+                        <input
+                          type="checkbox"
+                          checked={!!a.delivered}
+                          disabled={savingId === a.id}
+                          onChange={e => handleDeliveredChange(a.id, e.target.checked)}
+                        />
+                        <span>Livré</span>
+                      </label>
+                    </li>
                   )}
                 </Draggable>
               ))}
               {provided.placeholder}
-            </div>
+            </ul>
           )}
         </Droppable>
       </DragDropContext>
