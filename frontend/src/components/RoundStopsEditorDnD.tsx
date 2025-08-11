@@ -3,6 +3,7 @@ import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
 import type { DropResult } from "@hello-pangea/dnd";
 import type { AddressRound } from "../types";
 import { reorderRoundAddressesIds, updateAddressDelivered } from "../api/apiRound";
+import styles from "../assets/css/RoundStopsEditorDnD.module.css";
 
 interface Props {
   roundId: number;
@@ -81,12 +82,12 @@ const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddress
                       ref={provided.innerRef}
                       {...provided.draggableProps}
                       {...provided.dragHandleProps}
-                      className="p-3 bg-white rounded shadow flex items-center justify-between"
+                      className={styles.draggableItem}
                     >
                       <span className="text-sm">
                         {index + 1}. {a.address_text}
                       </span>
-                      <label className="flex items-center space-x-2 text-sm">
+                      <label className={styles.checkboxLabel}>
                         <input
                           type="checkbox"
                           checked={!!a.delivered}

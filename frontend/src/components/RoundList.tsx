@@ -1,52 +1,69 @@
 import React from "react";
-import type { Round } from "../types/index";
 import { Link } from "react-router-dom";
+import type { Round } from "../types";
+import styles from "../assets/css/RoundList.module.css";
 
 type Props = { rounds: Round[] };
 
-const RoundList: React.FC<Props> = ({ rounds }) => (
-  // <ul>
-  //   {rounds.map(r => (
-  //     <li key={r.id} className="flex justify-between py-2">
-  //       <span>{r.date} ({r.itinerary.length} addresses)</span>
-  //       <Link to={`/round/${r.id}`} className="text-blue-600">Details &gt;</Link>
-  //     </li>
-  //   ))}
-  // </ul>
-   <ul>
-    {rounds.map(r => {
-      // Try to parse itinerary if it's a string
-      let steps: string[] = [];
-      if (r.itinerary) {
-        try {
-          const parsed = typeof r.itinerary === "string"
-            ? JSON.parse(r.itinerary)
-            : r.itinerary;
-          steps = parsed.steps || [];
-        } catch (e) {
-          steps = [];
+const RoundList: React.FC<Props> = ({ rounds }) => {
+  return (
+    <div className={styles.wrap}>
+      {rounds.map(r => {
+        // Parse itinerary -> steps[]
+        let steps: string[] = [];
+        if (r.itinerary) {
+          try {
+            const parsed =
+              typeof r.itinerary === "string"
+                ? JSON.parse(r.itinerary)
+                : r.itinerary;
+            steps = Array.isArray(parsed?.steps) ? parsed.steps : [];
+          } catch {
+            steps = [];
+          }
         }
-      }
-      return (
-        <li key={r.id} className="flex flex-col py-2 border-b">
-          <div className="flex justify-between items-center">
-            <span>{r.date} ({steps?.length ?? 0} etapes)</span>
-            <br/>
-            <Link to={`/round/${r.id}/optimize`} className="text-blue-600">Voir sur la carte</Link>
-          </div>
-          {steps.length > 0 && (
-            <ul style={{ marginTop: 6, paddingLeft: 18 }}>
-              {steps.map((step, i) => (
-                <li key={i} style={{ fontSize: ".95rem", color: "#4b5563" }}>
-                  {step}
-                </li>
-              ))}
-            </ul>
-          )}
-        </li>
-      );
-    })}
-  </ul>
-);
+
+        return (
+          <article key={r.id} className={styles.card}>
+            <header className={styles.cardHeader}>
+              <h3 className={styles.title}>Tournée #{r.id}</h3>
+              <div className={styles.titleRow}>
+                {r.date && <span className={styles.tag}>{r.date}</span>}
+              </div>
+              <div className={styles.meta}>
+                <span className={styles.badge}>
+                  {steps.length} étape{steps.length > 1 ? "s" : ""}
+                </span>
+                {/* {r.type_optimisation && (
+                  <span className={styles.badgeMuted}>{r.type_optimisation}</span>
+                )} */}
+              </div>
+            </header>
+
+            {steps.length > 0 && (
+              <ul className={styles.steps}>
+                {steps.map((step, i) => (
+                  <li key={i} className={styles.step}>
+                    <span className={styles.stepIndex}>{i + 1}</span>
+                    <span className={styles.stepText}>{step}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
+
+            <footer className={styles.actions}>
+              <Link
+                to={`/round/${r.id}/optimize`}
+                className={`${styles.neuBtn} ${styles.primary}`}
+              >
+                Voir sur la carte
+              </Link>
+            </footer>
+          </article>
+        );
+      })}
+    </div>
+  );
+};
 
 export default RoundList;

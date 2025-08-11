@@ -65,34 +65,51 @@ const OptimizeRoundPage: React.FC = () => {
       <Sidebar />
       <div className={commonStyles.mainContent}>
         <Navbar />
-        <main className="flex-1 p-8">
-          <h2 className="text-xl font-semibold mb-4">
-            Optimiser votre tournée
-          </h2>
-          <div className="mb-4">
-            <div className="mb-4 flex gap-2"></div>
+        <main className={styles.container}>
+          <div className={styles.headerRow}>
+            <h2 className={styles.title}>Optimiser votre tournée</h2>
+            <div className={styles.headerMeta}>
+              <span className={styles.tag}>#{round.id}</span>
+              {round.date && <span className={styles.tag}>{round.date}</span>}
+            </div>
           </div>
-          <div className={styles.bottomBarButton}>
-            <button className="btn" onClick={() => setShowEditor(v => !v)}>
-              {showEditor ? "Masquer l’édition" : "Edit Order"}
-            </button>
+
+          <div className={styles.toolbar}>
             <button
-              className="btn"
+              className={styles.neuBtn}
+              onClick={() => setShowEditor((v) => !v)}
+              aria-pressed={showEditor}
+            >
+              {showEditor ? "Masquer les étapes" : "Afficher les étapes"}
+            </button>
+
+            <button
+              className={`${styles.neuBtn} ${styles.primary}`}
               onClick={handleOptimize}
               disabled={optimizing}
             >
-              {optimizing ? "Optimizing..." : "Recalculate"}
+              {optimizing ? "Optimisation" : "Recalculer"}
             </button>
-            {/* <button className="btn">Save</button> */}
-            <button className="btn">Export PDF</button>
+
+            <button className={`${styles.neuBtn} ${styles.ghost}`}>Exporter le PDF</button>
           </div>
-          <MapView addresses={addresses} polyline={orsPolyline} />
+
+          <section className={styles.mapCard}>
+            <MapView addresses={addresses} polyline={orsPolyline} />
+          </section>
+
           {showEditor && round && (
-            <RoundStopsEditorDnD
-              roundId={round.id}
-              addresses={addresses}
-              onAddressesChange={setAddresses}
-            />
+            <section className={styles.panel}>
+              <div className={styles.panelHeader}>
+                <h3 className={styles.panelTitle}>Étapes & Livraison</h3>
+                <p className={styles.panelSub}>Faites glisser pour réordonner, cochez « Livré » pour marquer l’étape.</p>
+              </div>
+              <RoundStopsEditorDnD
+                roundId={round.id}
+                addresses={addresses}
+                onAddressesChange={setAddresses}
+              />
+            </section>
           )}
         </main>
       </div>

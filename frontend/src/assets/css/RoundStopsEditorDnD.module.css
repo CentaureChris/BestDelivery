@@ -1,0 +1,40 @@
+.draggableItem {
+  list-style: none;
+  text-decoration: none;
+  padding: 0.9rem 1rem;
+  border-radius: 12px;
+  background: #e8e8e8;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  transition: all 0.3s ease;
+  cursor: grab;
+
+  /* Neumorphism shadow */
+  box-shadow: 6px 6px 12px #c5c5c5,
+              -6px -6px 12px #ffffff;
+}
+
+.draggableItem:active {
+  cursor: grabbing;
+  box-shadow: inset 4px 4px 12px #c5c5c5,
+              inset -4px -4px 12px #ffffff;
+}
+
+.draggableItem span {
+  font-size: 1rem;
+  color: #222;
+}
+
+.checkboxLabel {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.9rem;
+  color: #555;
+}
+
+.checkboxLabel input[type="checkbox"] {
+  transform: scale(1.2);
+  accent-color: #42b883; /* green checkmark */
+}
