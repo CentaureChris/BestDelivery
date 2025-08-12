@@ -74,7 +74,7 @@ const RoundForm: React.FC = () => {
           placeholder="Saisir une adresse"
           className={styles.input}
         />
-        <button type="submit" className="btn">
+        <button type="submit" className="btn m-2">
           Ajouter
         </button>
       </form>

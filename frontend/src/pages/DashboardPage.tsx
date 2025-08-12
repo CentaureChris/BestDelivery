@@ -15,6 +15,7 @@ const DashboardPage: React.FC = () => {
   const [rounds, setRounds] = useState<Round[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     setLoading(true);
@@ -31,9 +32,22 @@ const DashboardPage: React.FC = () => {
 
   return (
     <div className={commonStyles.layout}>
-      <Sidebar />
+       {/* Sidebar wrapper that opens/closes */}
+      <aside
+        className={`${commonStyles.sidebarWrap} ${
+          sidebarOpen ? commonStyles.open : commonStyles.closed
+        }`}
+        aria-hidden={!sidebarOpen}
+      >
+        <Sidebar />
+      </aside>
       <div className={commonStyles.mainContent}>
-        <Navbar />
+        <Navbar
+          onToggleSidebar={() => {
+            console.log("[Page] toggling sidebar");
+            setSidebarOpen(prev => !prev);
+          }}
+        />
         <main className={commonStyles.main}>
           <h2 className={commonStyles.heading}>Mes Tournées</h2>
           {loading && <p>Loading...</p>}

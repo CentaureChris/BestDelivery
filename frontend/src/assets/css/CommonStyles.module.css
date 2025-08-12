@@ -23,3 +23,24 @@
   margin-bottom: 1.5rem;
   color: #16191f;
 }
+
+.sidebarWrap {
+  width: 240px;                 /* open width */
+  transition: width .22s ease, transform .22s ease, opacity .22s ease;
+  overflow: hidden;             /* hide content when closed */
+  will-change: width, transform;
+  background: #2f343b;          /* keep your sidebar bg */
+}
+
+.sidebarWrap.closed {
+  width: 0;                     /* collapse */
+  transform: translateX(-8px);  /* subtle slide */
+  opacity: .0;
+  pointer-events: none;
+}
+
+.sidebarWrap.open {
+  width: 240px;
+  transform: translateX(0);
+  opacity: 1;
+}

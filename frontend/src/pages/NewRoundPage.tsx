@@ -1,34 +1,38 @@
-import React from "react";
+import React, {useState} from "react";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 import RoundForm from "../components/RoundForm";
 import { useNavigate } from "react-router-dom";
 import type { Address } from "../types/index";
-import commonStyles from '../assets/css/CommonStyles.module.css';
+import commonStyles from "../assets/css/CommonStyles.module.css";
 
 const NewRoundPage: React.FC = () => {
-  const navigate = useNavigate();
-
-  const handleSubmit = (addresses: Address[]) => {
-    // POST to backend, then redirect to optimize page
-    // For now, simulate and redirect:
-    navigate("/round/123/optimize");
-  };
+const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className={commonStyles.layout}>
-    <Sidebar />
-    <div className={commonStyles.mainContent}>
-      <Navbar />
-      <main className={commonStyles.main}>
-        <h2 className={commonStyles.heading}>Créer une nouvelle tournée</h2>
-        <RoundForm onSubmit={handleSubmit} />
-      </main>
-    </div>
-  </div>
+      <aside
+        className={`${commonStyles.sidebarWrap} ${
+          sidebarOpen ? commonStyles.open : commonStyles.closed
+        }`}
+        aria-hidden={!sidebarOpen}
+      >
+        <Sidebar />
+      </aside>
+      <div className={commonStyles.mainContent}>
+        <Navbar
+          onToggleSidebar={() => {
+            console.log("[Page] toggling sidebar");
+            setSidebarOpen(prev => !prev);
+          }}
+        />
+          <main className={commonStyles.main}>
+            <h2 className={commonStyles.heading}>Créer une nouvelle tournée</h2>
+            <RoundForm />
+          </main>
+        </div>
+      </div>
   );
 };
 
 export default NewRoundPage;
-
-  

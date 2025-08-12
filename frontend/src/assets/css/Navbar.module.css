@@ -39,3 +39,12 @@
   background: #4094f7;
   color: #fff;
 }
+
+.burger {
+  background: #ecf0f3;
+  border: none;
+  padding: 0.5rem;
+  border-radius: 10px;
+  cursor: pointer;
+  box-shadow: 4px 4px 8px #c5c5c5, -4px -4px 8px #ffffff;
+}

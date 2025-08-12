@@ -21,10 +21,10 @@ const OptimizeRoundPage: React.FC = () => {
   );
   const [optimizing, setOptimizing] = useState(false);
   const [showEditor, setShowEditor] = useState(false);
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   useEffect(() => {
     if (!id) return;
-
     setLoading(true);
     setError(null);
 
@@ -62,10 +62,30 @@ const OptimizeRoundPage: React.FC = () => {
 
   return (
     <div className={commonStyles.layout}>
-      <Sidebar />
-      <div className={commonStyles.mainContent}>
-        <Navbar />
+      {/* Sidebar wrapper that opens/closes */}
+      <aside
+        className={`${styles.sidebarWrap} ${
+          sidebarOpen ? styles.open : styles.closed
+        }`}
+        aria-hidden={!sidebarOpen}
+      >
+        <Sidebar />
+      </aside>
+
+      {/* Main area expands when sidebar closed */}
+      <div
+        className={`${styles.content} ${
+          !sidebarOpen ? styles.contentExpanded : ""
+        }`}
+      >
+        <Navbar
+          onToggleSidebar={() => {
+            console.log("[Page] toggling sidebar");
+            setSidebarOpen(prev => !prev);
+          }}
+        />
         <main className={styles.container}>
+          {/* ... rest of your page unchanged ... */}
           <div className={styles.headerRow}>
             <h2 className={styles.title}>Optimiser votre tournée</h2>
             <div className={styles.headerMeta}>
@@ -77,7 +97,7 @@ const OptimizeRoundPage: React.FC = () => {
           <div className={styles.toolbar}>
             <button
               className={styles.neuBtn}
-              onClick={() => setShowEditor((v) => !v)}
+              onClick={() => setShowEditor(v => !v)}
               aria-pressed={showEditor}
             >
               {showEditor ? "Masquer les étapes" : "Afficher les étapes"}
@@ -91,7 +111,9 @@ const OptimizeRoundPage: React.FC = () => {
               {optimizing ? "Optimisation" : "Recalculer"}
             </button>
 
-            <button className={`${styles.neuBtn} ${styles.ghost}`}>Exporter le PDF</button>
+            <button className={`${styles.neuBtn} ${styles.ghost}`}>
+              Exporter le PDF
+            </button>
           </div>
 
           <section className={styles.mapCard}>
@@ -102,7 +124,10 @@ const OptimizeRoundPage: React.FC = () => {
             <section className={styles.panel}>
               <div className={styles.panelHeader}>
                 <h3 className={styles.panelTitle}>Étapes & Livraison</h3>
-                <p className={styles.panelSub}>Faites glisser pour réordonner, cochez « Livré » pour marquer l’étape.</p>
+                <p className={styles.panelSub}>
+                  Faites glisser pour réordonner, cochez « Livré » pour marquer
+                  l’étape.
+                </p>
               </div>
               <RoundStopsEditorDnD
                 roundId={round.id}
