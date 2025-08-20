@@ -63,14 +63,14 @@ const OptimizeRoundPage: React.FC = () => {
   return (
     <div className={commonStyles.layout}>
       {/* Sidebar wrapper that opens/closes */}
-      <aside
+      <div
         className={`${styles.sidebarWrap} ${
           sidebarOpen ? styles.open : styles.closed
         }`}
         aria-hidden={!sidebarOpen}
       >
         <Sidebar />
-      </aside>
+      </div>
 
       {/* Main area expands when sidebar closed */}
       <div

@@ -11,14 +11,14 @@ const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <div className={commonStyles.layout}>
-      <aside
+      <div
         className={`${commonStyles.sidebarWrap} ${
           sidebarOpen ? commonStyles.open : commonStyles.closed
         }`}
         aria-hidden={!sidebarOpen}
       >
         <Sidebar />
-      </aside>
+      </div>
       <div className={commonStyles.mainContent}>
         <Navbar
           onToggleSidebar={() => {

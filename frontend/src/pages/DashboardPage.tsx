@@ -33,14 +33,14 @@ const DashboardPage: React.FC = () => {
   return (
     <div className={commonStyles.layout}>
        {/* Sidebar wrapper that opens/closes */}
-      <aside
+      <div
         className={`${commonStyles.sidebarWrap} ${
           sidebarOpen ? commonStyles.open : commonStyles.closed
         }`}
         aria-hidden={!sidebarOpen}
       >
         <Sidebar />
-      </aside>
+      </div>
       <div className={commonStyles.mainContent}>
         <Navbar
           onToggleSidebar={() => {
