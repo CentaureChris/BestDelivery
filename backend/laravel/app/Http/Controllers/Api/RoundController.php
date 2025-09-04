@@ -14,6 +14,25 @@ use Illuminate\Support\Facades\Http;
 class RoundController extends Controller
 {
     /**
+     * Format addresses so that pivot fields (order, delivered)
+     * are flattened at top-level for the frontend.
+     */
+    private function formatAddresses($addresses)
+    {
+        return $addresses->map(function ($a) {
+            return [
+                'id'           => $a->id,
+                'address_text' => $a->address_text,
+                'latitude'     => $a->latitude,
+                'longitude'    => $a->longitude,
+                // expose pivot fields directly
+                'order'        => isset($a->pivot) ? (int) $a->pivot->order : (int) ($a->order ?? 0),
+                'delivered'    => isset($a->pivot) ? (bool) $a->pivot->delivered : (bool) ($a->delivered ?? false),
+                'comment'      => $a->comments ?? null,
+            ];
+        })->values();
+    }
+    /**
      * Display a listing of the resource (only for the connected user).
      */
     public function index(Request $request)
@@ -115,10 +134,9 @@ class RoundController extends Controller
             return response()->json(['message' => 'Round not found'], 404);
         }
 
-        // On récupère les adresses liées à cette tournée
-        $addresses = $round->addresses()->orderBy('order')->get();
-
-        return response()->json($addresses);
+        // Adresses liées à cette tournée – tri sur l'ordre du pivot
+        $addresses = $round->addresses()->orderBy('address_round.order')->get();
+        return response()->json($this->formatAddresses($addresses));
     }
 
     public function optimize(Request $request, Round $round) // Function for GraphHopper
@@ -215,8 +233,8 @@ class RoundController extends Controller
 
         // Renvoie aussi la géométrie (si besoin) pour l'affichage du tracé
         return response()->json([
-            'addresses' => $orderedAddresses,
-            'solution' => $solution,
+            'addresses' => $this->formatAddresses($orderedAddresses),
+            'solution'  => $solution,
         ]);
     }
 
@@ -283,7 +301,7 @@ class RoundController extends Controller
 
             return response()->json([
                 'message'   => 'Addresses attached successfully.',
-                'addresses' => $ordered,
+                'addresses' => $this->formatAddresses($ordered),
                 'itinerary' => $round->itinerary
             ], 201);
         } catch (\Throwable $e) {
@@ -349,7 +367,6 @@ class RoundController extends Controller
 
         // return fresh ordered list
         $addresses = $round->addresses()->orderBy('address_round.order')->get();
-
-        return response()->json(['addresses' => $addresses]);
+        return response()->json(['addresses' => $this->formatAddresses($addresses)]);
     }
 }

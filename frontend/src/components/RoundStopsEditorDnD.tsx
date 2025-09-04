@@ -4,16 +4,21 @@ import type { DropResult } from "@hello-pangea/dnd";
 import type { AddressRound } from "../types";
 import { reorderRoundAddressesIds, updateAddressDelivered } from "../api/apiRound";
 import styles from "../assets/css/RoundStopsEditorDnD.module.css";
+import { updateAddress, deleteAddress } from "../api/apiAddress";
+import { geocodeAddress } from "../api/geocode";
 
 interface Props {
   roundId: number;
   addresses: AddressRound[]; // <- matches parent
   onAddressesChange: (addrs: AddressRound[]) => void; // <- matches parent
+  enableCrud?: boolean;
 }
 
-const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddresses, onAddressesChange }) => {
+const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddresses, onAddressesChange, enableCrud = false }) => {
   const [addresses, setAddresses] = useState<AddressRound[]>(propsAddresses ?? []);
   const [savingId, setSavingId] = useState<number | null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
+  const [editText, setEditText] = useState<string>("");
 
   // keep local list in sync with parent changes
   useEffect(() => {
@@ -64,6 +69,60 @@ const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddress
     }
   };
 
+  const startEdit = (a: AddressRound) => {
+    setEditingId(a.id);
+    setEditText(a.address_text);
+  };
+
+  const cancelEdit = () => {
+    setEditingId(null);
+    setEditText("");
+  };
+
+  const saveEdit = async (a: AddressRound) => {
+    const newText = editText.trim();
+    if (!newText) return;
+    try {
+      setSavingId(a.id);
+      const coords = await geocodeAddress(newText);
+      if (!coords) throw new Error("Adresse introuvable");
+      const updated = await updateAddress(a.id, {
+        address_text: newText,
+        latitude: coords.lat,
+        longitude: coords.lon,
+        order: a.order,
+        delivered: !!a.delivered,
+        comments: a.comment ?? "",
+      } as any);
+
+      const next = addresses.map(x => (x.id === a.id ? { ...x, ...updated } : x));
+      setAddresses(next);
+      onAddressesChange(next);
+      setEditingId(null);
+      setEditText("");
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
+  const removeAddress = async (a: AddressRound) => {
+    try {
+      setSavingId(a.id);
+      await deleteAddress(a.id);
+      const next = addresses.filter(x => x.id !== a.id);
+      // Reorder pivot after removal
+      setAddresses(next);
+      onAddressesChange(next);
+      await reorderRoundAddressesIds(roundId, next.map(x => x.id));
+    } catch (e) {
+      console.error(e);
+    } finally {
+      setSavingId(null);
+    }
+  };
+
   if (!addresses || addresses.length === 0) {
     return <div className="text-sm text-gray-500 mt-4">Aucune adresse à afficher.</div>;
   }
@@ -84,18 +143,69 @@ const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddress
                       {...provided.dragHandleProps}
                       className={styles.draggableItem}
                     >
-                      <span className="text-sm">
-                        {index + 1}. {a.address_text}
-                      </span>
-                      <label className={styles.checkboxLabel}>
-                        <input
-                          type="checkbox"
-                          checked={!!a.delivered}
-                          disabled={savingId === a.id}
-                          onChange={e => handleDeliveredChange(a.id, e.target.checked)}
-                        />
-                        <span>Livré</span>
-                      </label>
+                      <div className="flex items-center gap-3 flex-1">
+                        <span className="text-sm">
+                          {index + 1}. {editingId === a.id ? (
+                            <input
+                              value={editText}
+                              onChange={e => setEditText(e.target.value)}
+                              className="px-2 py-1 border rounded"
+                              disabled={savingId === a.id}
+                            />
+                          ) : (
+                            a.address_text
+                          )}
+                        </span>
+                      </div>
+
+                      <div className="flex items-center gap-3">
+                        <label className={styles.checkboxLabel}>
+                          <input
+                            type="checkbox"
+                            checked={!!a.delivered}
+                            disabled={savingId === a.id}
+                            onChange={e => handleDeliveredChange(a.id, e.target.checked)}
+                          />
+                          <span>Livré</span>
+                        </label>
+                        {enableCrud && (
+                          <div className="flex items-center gap-2">
+                            {editingId === a.id ? (
+                              <>
+                                <button
+                                  className="px-2 py-1 bg-green-600 text-white rounded"
+                                  disabled={savingId === a.id}
+                                  onClick={() => saveEdit(a)}
+                                >
+                                  Sauver
+                                </button>
+                                <button
+                                  className="px-2 py-1 bg-gray-300 rounded"
+                                  onClick={cancelEdit}
+                                >
+                                  Annuler
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                <button
+                                  className="px-2 py-1 bg-blue-600 text-white rounded"
+                                  onClick={() => startEdit(a)}
+                                >
+                                  Éditer
+                                </button>
+                                <button
+                                  className="px-2 py-1 bg-red-600 text-white rounded"
+                                  disabled={savingId === a.id}
+                                  onClick={() => removeAddress(a)}
+                                >
+                                  Supprimer
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        )}
+                      </div>
                     </li>
                   )}
                 </Draggable>

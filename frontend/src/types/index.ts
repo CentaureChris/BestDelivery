@@ -5,7 +5,7 @@ export interface AddressRound {
   longitude?:  number | undefined;
   order: number;
   delivered?: boolean;
-  comment?: string;
+  comment?: string | null;
 }
 
 export interface Round {

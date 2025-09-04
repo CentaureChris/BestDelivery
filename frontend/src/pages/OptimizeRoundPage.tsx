@@ -128,6 +128,7 @@ const OptimizeRoundPage: React.FC = () => {
                   Faites glisser pour réordonner, cochez « Livré » pour marquer
                   l’étape.
                 </p>
+                <button>Modifier la tournée</button>
               </div>
               <RoundStopsEditorDnD
                 roundId={round.id}
