@@ -3,11 +3,21 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Address;
+use App\Models\Round;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 
 class AddressController extends Controller
 {
+    private function refreshItineraryForRound(Round $round): void
+    {
+        $steps = $round->addresses()
+            ->orderBy('address_round.order')
+            ->pluck('address_text')
+            ->toArray();
+        $round->itinerary = json_encode(['steps' => $steps]);
+        $round->save();
+    }
     /**
      * Display a listing of the resource.
      */
@@ -73,6 +83,12 @@ class AddressController extends Controller
 
         $address->update($validated);
 
+        // Update itinerary for all rounds containing this address
+        $rounds = $address->round()->get();
+        foreach ($rounds as $round) {
+            $this->refreshItineraryForRound($round);
+        }
+
         return response()->json($address);
     }
 
@@ -87,7 +103,15 @@ class AddressController extends Controller
             return response()->json(['message' => 'address not found'], 404);
         }
 
+        // capture impacted rounds before deletion
+        $rounds = $address->round()->get();
+
         $address->delete();
+
+        // refresh itineraries of impacted rounds
+        foreach ($rounds as $round) {
+            $this->refreshItineraryForRound($round);
+        }
 
         return response()->json(['message' => 'address deleted successfully.']);
     }

@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import Navbar from "../components/Navbar";
 import Sidebar from "../components/Sidebar";
 // import RoundStopsEditor from "../components/RoundStopsEditor";
@@ -128,7 +128,9 @@ const OptimizeRoundPage: React.FC = () => {
                   Faites glisser pour réordonner, cochez « Livré » pour marquer
                   l’étape.
                 </p>
-                <button>Modifier la tournée</button>
+                <Link key={id} to={`/round/${id}/edit`}>
+                  Modifier la tournée
+                </Link>
               </div>
               <RoundStopsEditorDnD
                 roundId={round.id}

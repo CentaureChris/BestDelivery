@@ -32,6 +32,19 @@ class RoundController extends Controller
             ];
         })->values();
     }
+
+    /**
+     * Recompute and persist the itinerary JSON from current ordered addresses.
+     */
+    private function refreshItinerary(Round $round): void
+    {
+        $steps = $round->addresses()
+            ->orderBy('address_round.order')
+            ->pluck('address_text')
+            ->toArray();
+        $round->itinerary = json_encode(['steps' => $steps]);
+        $round->save();
+    }
     /**
      * Display a listing of the resource (only for the connected user).
      */
@@ -231,9 +244,13 @@ class RoundController extends Controller
         }
         $orderedAddresses = $round->addresses()->orderBy('address_round.order')->get();
 
+        // keep itinerary in sync with new order
+        $this->refreshItinerary($round);
+
         // Renvoie aussi la géométrie (si besoin) pour l'affichage du tracé
         return response()->json([
             'addresses' => $this->formatAddresses($orderedAddresses),
+            'itinerary' => $round->itinerary,
             'solution'  => $solution,
         ]);
     }
@@ -287,13 +304,7 @@ class RoundController extends Controller
                 $attached[] = $address;
             }
 
-            $steps = $round->addresses()
-                ->orderBy('address_round.order')
-                ->pluck('address_text')
-                ->toArray();
-
-            $round->itinerary = json_encode(['steps' => $steps]);
-            $round->save();
+            $this->refreshItinerary($round);
 
             DB::commit();
 
@@ -324,7 +335,13 @@ class RoundController extends Controller
             $round->addresses()->updateExistingPivot($id, ['order' => $order + 1]);
         }
 
-        return response()->json(['message' => 'Order updated']);
+        // keep itinerary in sync
+        $this->refreshItinerary($round);
+
+        return response()->json([
+            'message'   => 'Order updated',
+            'itinerary' => $round->itinerary,
+        ]);
     }
 
     public function updateDelivered(Request $request, Round $round, Address $address)
@@ -336,7 +353,13 @@ class RoundController extends Controller
         $delivered = (bool) $request->input('delivered');
         $round->addresses()->updateExistingPivot($address->id, ['delivered' => $delivered]);
 
-        return response()->json(['message' => 'Delivered status updated']);
+        // keep itinerary in sync (optional, but ensures consistency)
+        $this->refreshItinerary($round);
+
+        return response()->json([
+            'message'   => 'Delivered status updated',
+            'itinerary' => $round->itinerary,
+        ]);
     }
 
     public function updatePivot(Request $request, Round $round, Address $address)
@@ -365,8 +388,14 @@ class RoundController extends Controller
             $round->addresses()->updateExistingPivot($address->id, $pivotData);
         }
 
+        // keep itinerary in sync
+        $this->refreshItinerary($round);
+
         // return fresh ordered list
         $addresses = $round->addresses()->orderBy('address_round.order')->get();
-        return response()->json(['addresses' => $this->formatAddresses($addresses)]);
+        return response()->json([
+            'addresses' => $this->formatAddresses($addresses),
+            'itinerary' => $round->itinerary,
+        ]);
     }
 }
