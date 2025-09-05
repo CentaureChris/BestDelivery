@@ -3,7 +3,7 @@ import Sidebar from "../components/Sidebar";
 import RoundList from "../components/RoundList";
 import Navbar from "../components/Navbar";
 import type { Round } from "../types/index";
-import { fetchRounds } from "../api/";
+import { fetchRounds, deleteRound } from "../api/";
 import commonStyles from "../assets/css/CommonStyles.module.css";
 
 // [
@@ -30,6 +30,17 @@ const DashboardPage: React.FC = () => {
       });
   }, []);
 
+  const handleDelete = async (id: number) => {
+    const ok = window.confirm(`Supprimer la tournée #${id} ?`);
+    if (!ok) return;
+    try {
+      await deleteRound(id);
+      setRounds(prev => prev.filter(r => r.id !== id));
+    } catch (e) {
+      setError("Échec de la suppression de la tournée.");
+    }
+  };
+
   return (
     <div className={commonStyles.layout}>
        {/* Sidebar wrapper that opens/closes */}
@@ -52,7 +63,9 @@ const DashboardPage: React.FC = () => {
           <h2 className={commonStyles.heading}>Mes Tournées</h2>
           {loading && <p>Loading...</p>}
           {error && <p style={{ color: "red" }}>{error}</p>}
-          {!loading && !error && <RoundList rounds={rounds} />}
+          {!loading && !error && (
+            <RoundList rounds={rounds} onDelete={handleDelete} />
+          )}
         </main>
       </div>
     </div>

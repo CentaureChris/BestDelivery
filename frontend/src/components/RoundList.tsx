@@ -1,11 +1,12 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import { FaRegTrashAlt } from "react-icons/fa";
 import type { Round } from "../types";
 import styles from "../assets/css/RoundList.module.css";
 
-type Props = { rounds: Round[] };
+type Props = { rounds: Round[]; onDelete?: (id: number) => void };
 
-const RoundList: React.FC<Props> = ({ rounds }) => {
+const RoundList: React.FC<Props> = ({ rounds, onDelete }) => {
   return (
     <div className={styles.wrap}>
       {rounds.map(r => {
@@ -58,6 +59,13 @@ const RoundList: React.FC<Props> = ({ rounds }) => {
               >
                 Voir sur la carte
               </Link>
+              <FaRegTrashAlt 
+                type="button"
+                className={`${styles.neuBtn} ${styles.iconBtn} ${styles.danger}`}
+                title="Supprimer la tournée"
+                aria-label={`Supprimer la tournée ${r.id}`}
+                onClick={() => onDelete && onDelete(r.id)}
+              />
             </footer>
           </article>
         );
