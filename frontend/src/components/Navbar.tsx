@@ -1,6 +1,6 @@
 import React from "react";
 import { logout } from "../api/";
-import { useNavigate } from "react-router-dom";
+import { useNavigate,Link } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
 import styles from "../assets/css/Navbar.module.css";
 
@@ -47,7 +47,9 @@ const Navbar: React.FC<Props> = ({ onToggleSidebar }) => {
       <span className={styles.brand}>SmartDelivery</span>
 
       <div className={styles.actions}>
-        <button className={styles.btn}>Profile</button>
+        <Link to="/profile/" className={styles.btn}>
+          Profile
+        </Link>
         <button className={styles.btn} onClick={userLogout}>
           Logout
         </button>

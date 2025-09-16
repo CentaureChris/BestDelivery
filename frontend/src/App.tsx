@@ -5,6 +5,7 @@ import NewRoundPage from "./pages/NewRoundPage";
 import OptimizeRoundPage from "./pages/OptimizeRoundPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
+import Profile from "./pages/Profile";
 import RoundEditPage from "./pages/RoundEditPage";
 import PrivateRoute from "./components/PrivateRoute";
 import { setAuthToken } from "./api/apiAuth"; // <-- import your token util
@@ -23,6 +24,7 @@ const App: React.FC = () => (
         <Route path="/round/new" element={<NewRoundPage />} />
         <Route path="/round/:id/optimize" element={<OptimizeRoundPage />} />
         <Route path="/round/:id/edit" element={<RoundEditPage />} />
+        <Route path="/profile" element={<Profile />} />
       </Route>
       {/* Add RoundDetailsPage, etc. */}
     </Routes>

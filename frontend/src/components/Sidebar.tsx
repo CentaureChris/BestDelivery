@@ -21,8 +21,7 @@ const Sidebar: React.FC = () => {
           className={
             location.pathname === "/"
               ? `${styles.menuItem} ${styles.menuItemActive}`
-              : styles.menuItem
-          }
+              : styles.menuItem}
         >
           Historique
         </Link>
