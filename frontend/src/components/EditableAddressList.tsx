@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { DragDropContext, Droppable, Draggable } from "@hello-pangea/dnd";
+import type { DropResult } from "@hello-pangea/dnd";
 import type { AddressRound } from "../types";
 import { reorderRoundAddressesIds, updateAddressDelivered } from "../api/apiRound";
 
@@ -11,7 +12,7 @@ interface Props {
 const EditableAddressList: React.FC<Props> = ({ roundId, initialAddresses }) => {
   const [addresses, setAddresses] = useState<AddressRound[]>(initialAddresses);
 
-  const handleDragEnd = async (result: any) => {
+  const handleDragEnd = async (result: DropResult) => {
     if (!result.destination) return;
 
     const newOrder = Array.from(addresses);

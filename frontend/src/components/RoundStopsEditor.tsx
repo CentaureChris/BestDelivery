@@ -14,17 +14,16 @@ const RoundStopsEditor: React.FC<Props> = ({ roundId, addresses, onAddressesChan
   // Prefer pivot.order / pivot.delivered if present, fallback to flat fields
   const ordered = useMemo(() => {
     return [...addresses].sort((a, b) => {
-      const oa = (a as any).pivot?.order ?? (a as any).order ?? 999999;
-      const ob = (b as any).pivot?.order ?? (b as any).order ?? 999999;
+      const oa = a.pivot?.order ?? a.order ?? 999999;
+      const ob = b.pivot?.order ?? b.order ?? 999999;
       return oa - ob;
     });
   }, [addresses]);
 
   const isDelivered = (a: AddressRound) =>
-    (a as any).pivot?.delivered ?? (a as any).delivered ?? false;
+    a.pivot?.delivered ?? a.delivered ?? false;
 
-  const currentOrder = (a: AddressRound) =>
-    (a as any).pivot?.order ?? (a as any).order ?? 0;
+  const currentOrder = (a: AddressRound) => a.pivot?.order ?? a.order ?? 0;
 
   const handleToggleDelivered = async (addr: AddressRound) => {
     try {

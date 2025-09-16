@@ -9,6 +9,7 @@ export interface Address {
   longitude: number;
   order: number;
   delivered: boolean;
+  comments?: string | null;
   // Add other fields as needed
 }
 

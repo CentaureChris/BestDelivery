@@ -93,7 +93,7 @@ const RoundStopsEditorDnD: React.FC<Props> = ({ roundId, addresses: propsAddress
         order: a.order,
         delivered: !!a.delivered,
         comments: a.comment ?? "",
-      } as any);
+      });
 
       const next = addresses.map(x => (x.id === a.id ? { ...x, ...updated } : x));
       setAddresses(next);

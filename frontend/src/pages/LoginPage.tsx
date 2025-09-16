@@ -20,11 +20,13 @@ const LoginPage: React.FC = () => {
       localStorage.setItem("token", token);
       setLoading(false);
       navigate("/"); 
-    } catch (err: any) {
-      setError(
-        err.response?.data?.message ||
-        "Login failed. Please check your credentials."
-      );
+    } catch (err: unknown) {
+      let message = "Login failed. Please check your credentials.";
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosErr = err as { response?: { data?: { message?: string } } };
+        message = axiosErr.response?.data?.message ?? message;
+      }
+      setError(message);
       setLoading(false);
     }
   };

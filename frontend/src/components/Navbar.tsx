@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import { logout } from "../api/";
 import { useNavigate } from "react-router-dom";
 import { FaBars } from "react-icons/fa";
@@ -18,8 +18,14 @@ const Navbar: React.FC<Props> = ({ onToggleSidebar }) => {
     try {
       logout();
       navigate("/login");
-    } catch (err: any) {
-      console.log("Logout Failed " + err?.response?.data?.message);
+    } catch (err: unknown) {
+      // ✅ Type narrowing
+      if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        console.log("Logout Failed " + axiosError.response?.data?.message);
+      } else {
+        console.log("Logout Failed", err);
+      }
     }
   };
 

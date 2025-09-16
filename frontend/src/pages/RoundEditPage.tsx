@@ -27,10 +27,13 @@ const RoundEditPage: React.FC = () => {
     setError(null);
     Promise.all([getRound(roundId), getAddresses(roundId)])
       .then(([r, a]) => {
-        setRound(r as any);
-        setAddresses((a as any) ?? []);
+        setRound(r);
+        setAddresses(a);
       })
-      .catch((e: any) => setError("Failed to load round or addresses. " + e.message))
+      .catch((e: unknown) => {
+        const message = e instanceof Error ? e.message : String(e);
+        setError("Failed to load round or addresses. " + message);
+      })
       .finally(() => setLoading(false));
   }, [roundId]);
 
@@ -44,18 +47,19 @@ const RoundEditPage: React.FC = () => {
     try {
       const coords = await geocodeAddress(text);
       if (!coords) throw new Error("Adresse introuvable");
-      const res: any = await attachAddressToRound(roundId, {
+      const res = await attachAddressToRound(roundId, {
         address_text: text,
         latitude: coords.lat,
         longitude: coords.lon,
         delivered: false,
-        order: addresses.length++
+        order: addresses.length + 1
       });
       const next = res?.addresses ?? [];
       if (next.length) setAddresses(next);
       setNewAddress("");
-    } catch (e: any) {
-      setError(e?.message || "Erreur lors de l'ajout d'adresse");
+    } catch (e: unknown) {
+      const message = e instanceof Error ? e.message : String(e);
+      setError(message || "Erreur lors de l'ajout d'adresse");
     } finally {
       setAdding(false);
     }

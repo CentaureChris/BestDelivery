@@ -51,9 +51,15 @@ const OptimizeRoundPage: React.FC = () => {
         data.ors_route?.geometry?.coordinates.map(([lng, lat]) => [lat, lng]) ??
           null
       );
-    } catch (e: any) {
-      setError("Erreur lors de l’optimisation." + e.message);
+    } catch (err: unknown) {
+       if (err && typeof err === "object" && "response" in err) {
+        const axiosError = err as { response?: { data?: { message?: string } } };
+        console.log("Logout Failed " + axiosError.response?.data?.message);
+      } else {
+        setError("Erreur lors de l’optimisation." + err);
+      }
     }
+   
     setOptimizing(false);
   };
 

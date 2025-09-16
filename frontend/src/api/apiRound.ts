@@ -1,15 +1,7 @@
 import axios from "axios";
-import type { AddressRound } from "../types";
+import type { AddressRound, Round } from "../types";
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000/api";;
-
-export interface Round {
-  id: number;
-  name: string;
-  date: string;
-  optimization_type: "shortest" | "fastest" | "eco";
-  // Add other fields as needed
-}
 
 export async function fetchRounds(): Promise<Round[]> {
   const response = await axios.get(`${API_BASE_URL}/rounds`);
@@ -17,12 +9,21 @@ export async function fetchRounds(): Promise<Round[]> {
 }
 
 
-export async function createRound(data: { name: string; date: string; type_optimisation: string }) {
+export async function createRound(data: { name: string; date: string; type_optimisation: string }): Promise<Round> {
   const res = await axios.post(`${API_BASE_URL}/rounds`, data);
   return res.data;
 }
 
-export async function attachAddressToRound(roundId: number, address: Partial<AddressRound>) {
+export interface AttachAddressResponse {
+  message?: string;
+  addresses: AddressRound[];
+  itinerary?: string | { steps: string[] } | null;
+}
+
+export async function attachAddressToRound(
+  roundId: number,
+  address: Partial<AddressRound>
+): Promise<AttachAddressResponse> {
   const res = await axios.post(`${API_BASE_URL}/rounds/${roundId}/addresses`, address);
   return res.data;
 }
@@ -41,7 +42,7 @@ export async function deleteRound(id: number): Promise<void> {
   await axios.delete(`${API_BASE_URL}/rounds/${id}`);
 }
 
-export async function getAddresses(id: number) {
+export async function getAddresses(id: number): Promise<AddressRound[]> {
   const response = await axios.get(`${API_BASE_URL}/rounds/${id}/addresses`);
   return response.data;
 }
