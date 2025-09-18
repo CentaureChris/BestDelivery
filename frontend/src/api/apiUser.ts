@@ -6,11 +6,10 @@ export type Me = {
   id: number;
   name: string;
   email: string;
-  phone?: string | null;
 };
 
 export async function getMe(): Promise<Me> {
-  const res = await axios.get(`${API_BASE_URL}/user`, { withCredentials: true });
+  const res = await axios.get(`${API_BASE_URL}/user`);
   return res.data;
 }
 
@@ -18,7 +17,7 @@ export async function getMe(): Promise<Me> {
  * Update only provided fields.
  * Backend: add a PATCH /api/user route (or reuse a standard UserController) if you don’t have it yet.
  */
-export async function updateMe(payload: Partial<Pick<Me, "name" | "email" | "phone">> & {
+export async function updateMe(payload: Partial<Pick<Me, "name" | "email" >> & {
   password?: string;
   password_confirmation?: string;
 }): Promise<Me> {

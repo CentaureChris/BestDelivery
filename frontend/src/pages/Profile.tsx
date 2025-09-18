@@ -22,12 +22,12 @@ const Profile: React.FC = () => {
   useEffect(() => {
     getMe()
       .then((u) => {
+        console.log(u);
         setMe(u);
         setForm((f) => ({
           ...f,
           name: u.name ?? "",
           email: u.email ?? "",
-          phone: u.phone ?? "",
         }));
       })
       .catch((e) => {
@@ -72,9 +72,14 @@ const Profile: React.FC = () => {
 
   return (
     <div className={commonStyles.layout}>
-      <aside className={`${styles.sidebarWrap} ${sidebarOpen ? styles.open : styles.closed}`}>
+      <div
+        className={`${commonStyles.sidebarWrap} ${
+          sidebarOpen ? commonStyles.open : commonStyles.closed
+        }`}
+        aria-hidden={!sidebarOpen}
+      >
         <Sidebar />
-      </aside>
+      </div>
 
       <div className={styles.content}>
         <Navbar onToggleSidebar={() => setSidebarOpen((p) => !p)} />
@@ -122,17 +127,7 @@ const Profile: React.FC = () => {
                     />
                   </div>
 
-                  <div className={styles.field}>
-                    <label className={styles.label}>Téléphone</label>
-                    <input
-                      className={styles.input}
-                      type="tel"
-                      name="phone"
-                      value={form.phone}
-                      onChange={onChange}
-                      placeholder="+33…"
-                    />
-                  </div>
+                 
                 </div>
 
                 <div className={styles.separator} />
